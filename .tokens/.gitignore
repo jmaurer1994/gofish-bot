@@ -1,0 +1,5 @@
+# Ignore all tokens
+*
+
+# Keep file
+!.gitignore
