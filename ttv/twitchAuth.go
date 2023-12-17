@@ -29,14 +29,14 @@ type TwitchAuthClient struct {
 	tokenKey           string
 }
 
-func NewTwitchTokenSource(tokenKey, clientID, clientSecret, port string, requiredScopes []string) oauth2.TokenSource {
+func NewTwitchTokenSource(tokenKey, clientID, clientSecret, redirectUri, port string, requiredScopes []string) oauth2.TokenSource {
 	tc := &TwitchAuthClient{
 		config: &oauth2.Config{
 			ClientID:     clientID,
 			ClientSecret: clientSecret,
 			Scopes:       requiredScopes,
 			Endpoint:     twitchauth.Endpoint,
-			RedirectURL:  fmt.Sprintf("http://localhost:%s/redirect", port),
+			RedirectURL:  redirectUri,
 		},
 		tokenSourceChannel: make(chan oauth2.TokenSource, 1),
 		tokenKey:           tokenKey,

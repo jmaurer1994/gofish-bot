@@ -44,11 +44,13 @@ func main() {
 
 	ttvClientId = os.Getenv("TTV_CLIENT_ID")
 	ttvClientSecret := os.Getenv("TTV_CLIENT_SECRET")
-
+    ttvRedirectUri := os.Getenv("TTV_REDIRECTURI")
 	ttvChannelName = os.Getenv("TTV_CHANNEL_NAME")
 	ttvBroadcasterId = os.Getenv("TTV_BROADCASTER_ID")
 	ttvBotUsername = os.Getenv("TTV_BOT_USERNAME")
 
+    ttvAuthServerPort := os.Getenv("TTV_AUTHSERVER_PORT")
+    
 	c = camera.IpCamera{
 		Address:  os.Getenv("IPCAMERA_ADDRESS"),
 		Username: os.Getenv("IPCAMERA_USERNAME"),
@@ -66,13 +68,13 @@ func main() {
 	tac = ttv.TwitchApiClient{
 		ClientId:      ttvClientId,
 		BroadcasterId: ttvBroadcasterId,
-		TokenSource:   ttv.NewTwitchTokenSource("api-client", ttvClientId, ttvClientSecret, "7369", []string{"channel:manage:broadcast"}),
+		TokenSource:   ttv.NewTwitchTokenSource("api-client", ttvClientId, ttvClientSecret, ttvRedirectUri, ttvAuthServerPort, []string{"channel:manage:broadcast"}),
 	}
 
 	tic = ttv.TwitchIrcClient{
 		Channel:     ttvChannelName,
 		Username:    ttvBotUsername,
-		TokenSource: ttv.NewTwitchTokenSource("irc-client", ttvClientId, ttvClientSecret, "7369", []string{"user:read:email", "channel:moderate", "chat:edit", "chat:read", "whispers:read", "whispers:edit"}),
+		TokenSource: ttv.NewTwitchTokenSource("irc-client", ttvClientId, ttvClientSecret, ttvRedirectUri, ttvAuthServerPort, []string{"user:read:email", "channel:moderate", "chat:edit", "chat:read", "whispers:read", "whispers:edit"}),
 	}
 
 	err = tic.Connect()
