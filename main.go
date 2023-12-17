@@ -44,7 +44,7 @@ func main() {
 
 	ttvClientId = os.Getenv("TTV_CLIENT_ID")
 	ttvClientSecret := os.Getenv("TTV_CLIENT_SECRET")
-    ttvRedirectUri := os.Getenv("TTV_REDIRECTURI")
+    ttvRedirectUri := os.Getenv("TTV_REDIRECT_URI")
 	ttvChannelName = os.Getenv("TTV_CHANNEL_NAME")
 	ttvBroadcasterId = os.Getenv("TTV_BROADCASTER_ID")
 	ttvBotUsername = os.Getenv("TTV_BOT_USERNAME")
