@@ -36,7 +36,7 @@ type Message string
 
 func NewScheduler() *Scheduler {
 	sch := &Scheduler{}
-
+    sch.listeners = make(map[EventID][]EventHandler)
 	return sch
 }
 
