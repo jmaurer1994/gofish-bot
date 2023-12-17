@@ -32,6 +32,7 @@ func UpdateChannelTitle(s *scheduler.Scheduler) {
 		nextSunEventCountdown = getTimeUntil(currentTime, w.Current.Sunrise)
 
 		if nextSunEventCountdown.hours < 1 && nextSunEventCountdown.minutes <= 10 {
+            log.Println("Generating camera light off event")
 			s.GenerateEvent("camera:light", "off")
 		}
 	} else if setTime > 0 {
@@ -39,6 +40,7 @@ func UpdateChannelTitle(s *scheduler.Scheduler) {
 		nextSunEventCountdown = getTimeUntil(currentTime, w.Current.Sunset)
 
 		if nextSunEventCountdown.hours < 1 && nextSunEventCountdown.minutes <= 10 {
+            log.Println("Generating camera light on event")
 			s.GenerateEvent("camera:light", "on")
 		}
 
@@ -50,6 +52,12 @@ func UpdateChannelTitle(s *scheduler.Scheduler) {
 
 	celcius := weather.FToC(w.Current.Temp)
 	conditionIcon := weather.GetConditionIcon(w.Current.Weather[0].Icon)
+    
+    lunarPhaseIcon,err = weather.LunarPhaseValueToEmoji(w.Daily[0].MoonPhase)
+    if(err != nil){
+        log.Printf("Could not get get lunar phase icon: %v\n", err)
+        return
+    }
 
 	conditionsString := fmt.Sprintf("[%s %s(%.0f°F/%.1f°C)]", conditionIcon, lunarPhaseIcon, w.Current.Temp, celcius)
 
