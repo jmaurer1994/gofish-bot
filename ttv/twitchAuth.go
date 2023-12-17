@@ -85,7 +85,7 @@ func (tc *TwitchAuthClient) GetTwitchTokenSource() oauth2.TokenSource {
 		// Handle the case where the token does not exist or is invalid
 		// You might need to obtain a new token here
 
-		log.Printf("Login required, scopes: {%s}\nStarted running on http://localhost:%s\n", tc.config.Scopes, tc.httpPort)
+		log.Printf("Login required, scopes: {%s}\n", tc.config.Scopes)
 
 		tc.startHttpServer()
 
