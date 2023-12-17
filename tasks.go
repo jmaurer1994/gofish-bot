@@ -33,7 +33,7 @@ func UpdateChannelTitle(s *scheduler.Scheduler) {
 
 		if nextSunEventCountdown.hours < 1 && nextSunEventCountdown.minutes <= 10 {
             log.Println("Generating camera light off event")
-			s.GenerateEvent("camera:light", "off")
+            s.GenerateEvent("camera:light:check", "off")
 		}
 	} else if setTime > 0 {
 		nextSunEvent = "sunset"
@@ -41,7 +41,7 @@ func UpdateChannelTitle(s *scheduler.Scheduler) {
 
 		if nextSunEventCountdown.hours < 1 && nextSunEventCountdown.minutes <= 10 {
             log.Println("Generating camera light on event")
-			s.GenerateEvent("camera:light", "on")
+            s.GenerateEvent("camera:light:check", "on")
 		}
 
 	} else {

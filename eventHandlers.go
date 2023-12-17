@@ -5,7 +5,7 @@ import (
 	"log"
 )
 
-func handleCheckLight(s *scheduler.Scheduler, m scheduler.Message) {
+func handleCameraLightCheck(s *scheduler.Scheduler, m scheduler.Message) {
 	log.Printf("Received light check event: %s\n", m)
 	switch m {
 	case "on":
