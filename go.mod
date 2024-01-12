@@ -15,13 +15,18 @@ require (
 )
 
 require (
+	github.com/andreykaipov/goobs v1.1.6 // indirect
 	github.com/beevik/etree v1.1.0 // indirect
+	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/elgs/gostrgen v0.0.0-20161222160715-9d61ae07eeae // indirect
 	github.com/gofrs/uuid v3.2.0+incompatible // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
-	github.com/gorilla/websocket v1.4.2 // indirect
+	github.com/gorilla/websocket v1.5.1 // indirect
+	github.com/hashicorp/logutils v1.0.0 // indirect
 	github.com/juju/errors v0.0.0-20220331221717-b38fca44723b // indirect
+	github.com/mmcloughlin/profile v0.1.1 // indirect
+	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect

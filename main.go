@@ -86,6 +86,7 @@ func main() {
 		ircReader.OnShardServerNotice(onShardServerNotice)
 		ircReader.OnShardLatencyUpdate(onShardLatencyUpdate)
 		ircReader.OnShardMessage(onChannelMessage)
+        ircReader.OnShardRawMessage(onRawMessage)
 	})
 
 	sch := scheduler.NewScheduler()
@@ -150,4 +151,8 @@ func onChannelMessage(shardID int, msg irc.ChatMessage) {
 			}
 		}
 	}
+}
+
+func onRawMessage(shardID int, msg irc.Message) {
+    log.Printf("#%s %s: %s\n", msg.Sender.Host, msg.Sender.Username, msg.Raw)
 }
