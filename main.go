@@ -13,6 +13,7 @@ import (
 	//vlc "github.com/adrg/libvlc-go/v3"
 	//  "github.com/carlmjohnson/requests"
 	"github.com/jmaurer1994/gofish/bot/camera"
+    "github.com/jmaurer1994/gofish/bot/obs"
 	"github.com/jmaurer1994/gofish/bot/scheduler"
 	"github.com/jmaurer1994/gofish/bot/ttv"
 	"github.com/jmaurer1994/gofish/bot/weather"
@@ -21,6 +22,7 @@ import (
 var (
 	tac              ttv.TwitchApiClient
 	tic              ttv.TwitchIrcClient
+    gc               *obs.GoobsClient
 	owm              weather.OwmClient
 	c                camera.IpCamera
 	ttvClientId      string
@@ -58,6 +60,14 @@ func main() {
 	}
 
 	c.ZeroLight()
+    
+    obsHost := os.Getenv("OBS_HOST")
+    obsPassword := os.Getenv("OBS_PASSWORD")
+
+    gc,err = obs.NewGoobsClient(obsHost, obsPassword)
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
 	owm = weather.OwmClient{
 		Latitude:  weatherLatitude,
@@ -149,10 +159,17 @@ func onChannelMessage(shardID int, msg irc.ChatMessage) {
 					c.IncreaseLight()
 				}
 			}
-		}
+        case "!fixcamera":
+            if msg.Sender.IsModerator {
+                err := gc.ToggleSourceVisibility("Main", "PondCamera")
+                if (err != nil) {
+                    log.Printf("%v\n", err)
+                }
+            }
+        }
 	}
 }
 
 func onRawMessage(shardID int, msg irc.Message) {
-    log.Printf("#%s %s: %s\n", msg.Sender.Host, msg.Sender.Username, msg.Raw)
+    log.Printf("#%s: %s\n", msg.Sender.Username, msg.Raw)
 }

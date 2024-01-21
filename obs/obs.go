@@ -44,15 +44,16 @@ func (gc *GoobsClient) ToggleSourceVisibility(sceneName, itemName string) error 
 		}
 	}
 
-	// then show our source
+	// hide source
 	err = gc.setSourceVisibility(sceneName, sourceID, false)
 
     if(err != nil){
         return err
     }
 
-	time.Sleep(3 * time.Second)
+	time.Sleep(4 * time.Second)
 
+    // show source
 	err = gc.setSourceVisibility(sceneName, sourceID, true)
 
     if(err != nil){
