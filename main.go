@@ -10,8 +10,7 @@ import (
 	"strings"
 	"syscall"
 	"time"
-	//vlc "github.com/adrg/libvlc-go/v3"
-	//  "github.com/carlmjohnson/requests"
+
 	"github.com/jmaurer1994/gofish/bot/camera"
     "github.com/jmaurer1994/gofish/bot/obs"
 	"github.com/jmaurer1994/gofish/bot/scheduler"
@@ -66,7 +65,7 @@ func main() {
 
     gc,err = obs.NewGoobsClient(obsHost, obsPassword)
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Fatal("Error creating goobs client")
 	}
 
 	owm = weather.OwmClient{
@@ -145,7 +144,7 @@ func onChannelMessage(shardID int, msg irc.ChatMessage) {
 	if len(tokens) > 0 {
 		switch tokens[0] {
 		case "!help":
-			tic.SendChannelMessage("Available commands: !help, !info, !nextsong")
+			tic.SendChannelMessage("Available commands: !help, !info, !clapclap*, !fixcamera*")
 		case "!info":
 			tic.SendChannelMessage("Welcome to the channel and thanks for stopping by! " +
 				"This is an ongoing personal/hobby project - the goal of which is " +
