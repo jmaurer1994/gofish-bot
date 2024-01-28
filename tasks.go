@@ -89,6 +89,10 @@ func getTimeUntil(start int, target int) *SunEventCountdown {
 }
 
 func SavePondCameraScreenshot(s *scheduler.Scheduler) {
+    if(c.CurrentLightLevel() > 0){
+        return //light on, don't take screenshot
+    }
+
 	err := gc.ScreenshotSource("PondCamera")
 
 	if err != nil {
