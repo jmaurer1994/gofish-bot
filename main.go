@@ -1,8 +1,6 @@
 package main
 
 import (
-	"github.com/Adeithe/go-twitch/irc"
-	"github.com/joho/godotenv"
 	"log"
 	"os"
 	"os/signal"
@@ -11,7 +9,11 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Adeithe/go-twitch/irc"
+	"github.com/joho/godotenv"
+
 	"github.com/jmaurer1994/gofish/bot/camera"
+	"github.com/jmaurer1994/gofish/bot/database"
 	"github.com/jmaurer1994/gofish/bot/obs"
 	"github.com/jmaurer1994/gofish/bot/scheduler"
 	"github.com/jmaurer1994/gofish/bot/ttv"
@@ -23,6 +25,7 @@ var (
 	tic              ttv.TwitchIrcClient
 	gc               *obs.GoobsClient
 	owm              weather.OwmClient
+    db               *database.PGClient
 	c                camera.IpCamera
 	ttvClientId      string
 	ttvChannelName   string
@@ -104,6 +107,8 @@ func main() {
 		ircReader.OnShardRawMessage(onRawMessage)
 	})
 
+    
+
 	sch := scheduler.NewScheduler()
 
 	sch.RegisterTask(scheduler.Task{
@@ -133,6 +138,11 @@ func main() {
 
 	log.Println("Starting task scheduler")
 	sch.Start()
+
+
+
+    db, err = database.NewPGClient(os.Getenv("DB_CONNECTION_URL"), sch)
+
 
 	<-sigs
 }
