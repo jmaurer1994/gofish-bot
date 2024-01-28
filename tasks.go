@@ -32,16 +32,16 @@ func UpdateChannelTitle(s *scheduler.Scheduler) {
 		nextSunEventCountdown = getTimeUntil(currentTime, w.Current.Sunrise)
 
 		if nextSunEventCountdown.hours < 1 && nextSunEventCountdown.minutes <= 10 {
-            log.Println("Generating camera light off event")
-            s.GenerateEvent("camera:light:check", "off")
+			log.Println("Generating camera light off event")
+			s.GenerateEvent("camera:light:check", "off")
 		}
 	} else if setTime > 0 {
 		nextSunEvent = "sunset"
 		nextSunEventCountdown = getTimeUntil(currentTime, w.Current.Sunset)
 
 		if nextSunEventCountdown.hours < 1 && nextSunEventCountdown.minutes <= 10 {
-            log.Println("Generating camera light on event")
-            s.GenerateEvent("camera:light:check", "on")
+			log.Println("Generating camera light on event")
+			s.GenerateEvent("camera:light:check", "on")
 		}
 
 	} else {
@@ -52,12 +52,12 @@ func UpdateChannelTitle(s *scheduler.Scheduler) {
 
 	celcius := weather.FToC(w.Current.Temp)
 	conditionIcon := weather.GetConditionIcon(w.Current.Weather[0].Icon)
-    
-    lunarPhaseIcon,err = weather.LunarPhaseValueToEmoji(w.Daily[0].MoonPhase)
-    if(err != nil){
-        log.Printf("Could not get get lunar phase icon: %v\n", err)
-        return
-    }
+
+	lunarPhaseIcon, err = weather.LunarPhaseValueToEmoji(w.Daily[0].MoonPhase)
+	if err != nil {
+		log.Printf("Could not get get lunar phase icon: %v\n", err)
+		return
+	}
 
 	conditionsString := fmt.Sprintf("[%s %s(%.0f°F/%.1f°C)]", conditionIcon, lunarPhaseIcon, w.Current.Temp, celcius)
 
@@ -85,5 +85,13 @@ func getTimeUntil(start int, target int) *SunEventCountdown {
 	return &SunEventCountdown{
 		hours:   (target - start) / 3600,
 		minutes: approxMinutes,
+	}
+}
+
+func SavePondCameraScreenshot(s *scheduler.Scheduler) {
+	err := gc.ScreenshotSource("PondCamera")
+
+	if err != nil {
+		log.Printf("Could not save screenshot: %v\n", err)
 	}
 }

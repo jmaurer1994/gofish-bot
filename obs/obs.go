@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/andreykaipov/goobs"
 	"github.com/andreykaipov/goobs/api/requests/sceneitems"
+	"github.com/andreykaipov/goobs/api/requests/sources"
 	"time"
 )
 
@@ -28,51 +29,65 @@ func NewGoobsClient(_server, password string) (*GoobsClient, error) {
 	return gc, nil
 }
 
-func (gc *GoobsClient) ToggleSourceVisibility(sceneName, itemName string) error {
-	params := sceneitems.NewGetSceneItemListParams().WithSceneName(sceneName)
-
-	sceneList, err := gc.client.SceneItems.GetSceneItemList(params)
-	if err != nil {
-        return fmt.Errorf("Error geting scenelist: %s", err)
-	}
+func (gc *GoobsClient) ToggleSourceVisibility(sceneName, sourceName string) error {
 
 	// find the ID of our source, while hiding all others
-	var sourceID int
-	for _, item := range sceneList.SceneItems {
-		if item.SourceName == itemName {
-			sourceID = item.SceneItemID
-		}
-	}
-
-	// hide source
-	err = gc.setSourceVisibility(sceneName, sourceID, false)
-
-    if(err != nil){
-        return err
-    }
-
-	time.Sleep(4 * time.Second)
-
-    // show source
-	err = gc.setSourceVisibility(sceneName, sourceID, true)
-
-    if(err != nil){
-        return err
-    }
-
-	return nil
-}
-
-func (gc *GoobsClient) setSourceVisibility(scene string, sourceID int, visible bool) error {
-	params := &sceneitems.SetSceneItemEnabledParams{
-		SceneName:        &scene,
-		SceneItemId:      &sourceID,
-		SceneItemEnabled: &visible,
-	}
-	_, err := gc.client.SceneItems.SetSceneItemEnabled(params)
+	sourceId, err := gc.getSourceIdByName(sceneName, sourceName)
 	if err != nil {
 		return err
 	}
 
-    return nil
+	// hide source
+	err = gc.setSourceVisibility(sceneName, sourceId, false)
+
+	if err != nil {
+		return err
+	}
+
+	time.Sleep(4 * time.Second)
+
+	// show source
+	err = gc.setSourceVisibility(sceneName, sourceId, true)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (gc *GoobsClient) getSourceIdByName(sceneName, sourceName string) (int, error) {
+	params := sceneitems.NewGetSceneItemListParams().WithSceneName(sceneName)
+
+	sceneList, err := gc.client.SceneItems.GetSceneItemList(params)
+	if err != nil {
+		return -1, fmt.Errorf("Error getting scenelist: %s", err)
+	}
+
+	for _, item := range sceneList.SceneItems {
+		if item.SourceName == sourceName {
+			return item.SceneItemID, nil
+		}
+	}
+
+	return -1, fmt.Errorf("Source not found in scene item list")
+}
+
+func (gc *GoobsClient) setSourceVisibility(scene string, sourceId int, visible bool) error {
+	params := &sceneitems.SetSceneItemEnabledParams{
+		SceneName:        &scene,
+		SceneItemId:      &sourceId,
+		SceneItemEnabled: &visible,
+	}
+	_, err := gc.client.SceneItems.SetSceneItemEnabled(params)
+
+	return err
+}
+
+// TODO: use env var for base screenshot location?
+func (gc *GoobsClient) ScreenshotSource(sourceName string) error {
+	params := sources.NewSaveSourceScreenshotParams().WithSourceName(sourceName).WithImageCompressionQuality(100).WithImageFilePath(fmt.Sprintf("M:\\screenshots\\%s", sourceName))
+	_, err := gc.client.Sources.SaveSourceScreenshot(params)
+
+	return err
 }

@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/jmaurer1994/gofish/bot/camera"
-    "github.com/jmaurer1994/gofish/bot/obs"
+	"github.com/jmaurer1994/gofish/bot/obs"
 	"github.com/jmaurer1994/gofish/bot/scheduler"
 	"github.com/jmaurer1994/gofish/bot/ttv"
 	"github.com/jmaurer1994/gofish/bot/weather"
@@ -21,7 +21,7 @@ import (
 var (
 	tac              ttv.TwitchApiClient
 	tic              ttv.TwitchIrcClient
-    gc               *obs.GoobsClient
+	gc               *obs.GoobsClient
 	owm              weather.OwmClient
 	c                camera.IpCamera
 	ttvClientId      string
@@ -45,13 +45,13 @@ func main() {
 
 	ttvClientId = os.Getenv("TTV_CLIENT_ID")
 	ttvClientSecret := os.Getenv("TTV_CLIENT_SECRET")
-    ttvRedirectUri := os.Getenv("TTV_REDIRECT_URI")
+	ttvRedirectUri := os.Getenv("TTV_REDIRECT_URI")
 	ttvChannelName = os.Getenv("TTV_CHANNEL_NAME")
 	ttvBroadcasterId = os.Getenv("TTV_BROADCASTER_ID")
 	ttvBotUsername = os.Getenv("TTV_BOT_USERNAME")
 
-    ttvAuthServerPort := os.Getenv("TTV_AUTHSERVER_PORT")
-    
+	ttvAuthServerPort := os.Getenv("TTV_AUTHSERVER_PORT")
+
 	c = camera.IpCamera{
 		Address:  os.Getenv("IPCAMERA_ADDRESS"),
 		Username: os.Getenv("IPCAMERA_USERNAME"),
@@ -59,11 +59,11 @@ func main() {
 	}
 
 	c.ZeroLight()
-    
-    obsHost := os.Getenv("OBS_HOST")
-    obsPassword := os.Getenv("OBS_PASSWORD")
 
-    gc,err = obs.NewGoobsClient(obsHost, obsPassword)
+	obsHost := os.Getenv("OBS_HOST")
+	obsPassword := os.Getenv("OBS_PASSWORD")
+
+	gc, err = obs.NewGoobsClient(obsHost, obsPassword)
 	if err != nil {
 		log.Fatal("Error creating goobs client")
 	}
@@ -95,7 +95,7 @@ func main() {
 		ircReader.OnShardServerNotice(onShardServerNotice)
 		ircReader.OnShardLatencyUpdate(onShardLatencyUpdate)
 		ircReader.OnShardMessage(onChannelMessage)
-        ircReader.OnShardRawMessage(onRawMessage)
+		ircReader.OnShardRawMessage(onRawMessage)
 	})
 
 	sch := scheduler.NewScheduler()
@@ -108,7 +108,15 @@ func main() {
 		RunAtStart: true,
 	})
 
-    sch.RegisterEventHandler("camera:light:check", handleCameraLightCheck)
+	sch.RegisterTask(scheduler.Task{
+		T:          "source:screenshot:save",
+		Enabled:    true,
+		Interval:   time.Duration(30) * time.Second,
+		F:          SavePondCameraScreenshot,
+		RunAtStart: true,
+	})
+
+	sch.RegisterEventHandler("camera:light:check", handleCameraLightCheck)
 
 	// Create a channel to receive os.Signal values.
 	sigs := make(chan os.Signal, 1)
@@ -137,7 +145,8 @@ func onShardChannelUserNotice(shardID int, n irc.UserNotice) {
 func onShardLatencyUpdate(shardID int, latency time.Duration) {
 	log.Printf("Shard #%d has %dms ping\n", shardID, latency.Milliseconds())
 }
-//TODO: command processor
+
+// TODO: command processor
 func onChannelMessage(shardID int, msg irc.ChatMessage) {
 	log.Printf("#%s %s: %s\n", msg.Channel, msg.Sender.DisplayName, msg.Text)
 	tokens := strings.Fields(msg.Text)
@@ -158,17 +167,17 @@ func onChannelMessage(shardID int, msg irc.ChatMessage) {
 					c.IncreaseLight()
 				}
 			}
-        case "!fixcamera":
-            if msg.Sender.IsModerator {
-                err := gc.ToggleSourceVisibility("Main", "PondCamera")
-                if (err != nil) {
-                    log.Printf("%v\n", err)
-                }
-            }
-        }
+		case "!fixcamera":
+			if msg.Sender.IsModerator {
+				err := gc.ToggleSourceVisibility("Main", "PondCamera")
+				if err != nil {
+					log.Printf("%v\n", err)
+				}
+			}
+		}
 	}
 }
 
 func onRawMessage(shardID int, msg irc.Message) {
-    log.Printf("#%s: %s\n", msg.Sender.Username, msg.Raw)
+	log.Printf("#%s: %s\n", msg.Sender.Username, msg.Raw)
 }
