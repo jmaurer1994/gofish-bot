@@ -27,7 +27,7 @@ type EventHandler func(s *Scheduler, m Message)
 
 type Event struct {
 	E EventID
-	M Message
+    M Message
 }
 
 type TaskID string
