@@ -18,3 +18,7 @@ func handleCameraLightCheck(s *scheduler.Scheduler, m scheduler.Message) {
 		}
 	}
 }
+
+func handleDatabaseEvent(s *scheduler.Scheduler, m scheduler.Message) {
+    log.Printf("Received insert event - did someone pull the string?\n%s\n", m)
+}
