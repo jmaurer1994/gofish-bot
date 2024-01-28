@@ -62,8 +62,14 @@ func main() {
 
 	obsHost := os.Getenv("OBS_HOST")
 	obsPassword := os.Getenv("OBS_PASSWORD")
+    obsScreenshotDirectory := os.Getenv("OBS_SCREENSHOT_DIRECTORY")
+    obsScreenshotFormat := os.Getenv("OBS_SCREENSHOT_FORMAT")
+    obsScreenshotQuality, qualityErr := strconv.ParseFloat(os.Getenv("OBS_SCREENSHOT_QUALITY"), 64)
+    if(qualityErr != nil){
+        log.Fatalf("Could not parse image quality from env value")
+    }
 
-	gc, err = obs.NewGoobsClient(obsHost, obsPassword)
+	gc, err = obs.NewGoobsClient(obsHost, obsPassword, obsScreenshotDirectory, obsScreenshotFormat, obsScreenshotQuality)
 	if err != nil {
 		log.Fatal("Error creating goobs client")
 	}

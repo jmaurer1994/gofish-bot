@@ -11,14 +11,20 @@ import (
 type GoobsClient struct {
 	server string
 	client *goobs.Client
+    screenshotDirectory string
+    screenshotFormat string
+    screenshotQuality float64
 }
 
-func NewGoobsClient(_server, password string) (*GoobsClient, error) {
+func NewGoobsClient(server, password, screenshotDirectory, screenshotFormat string, screenshotQuality float64) (*GoobsClient, error) {
 	gc := &GoobsClient{
-		server: _server,
+		server: server,
+        screenshotDirectory: screenshotDirectory,
+        screenshotFormat: screenshotFormat,
+        screenshotQuality: screenshotQuality,
 	}
 
-	client, err := goobs.New(_server, goobs.WithPassword(password))
+	client, err := goobs.New(server, goobs.WithPassword(password))
 
 	if err != nil {
 		return nil, err
@@ -86,7 +92,14 @@ func (gc *GoobsClient) setSourceVisibility(scene string, sourceId int, visible b
 
 // TODO: use env var for base screenshot location?
 func (gc *GoobsClient) ScreenshotSource(sourceName string) error {
-	params := sources.NewSaveSourceScreenshotParams().WithSourceName(sourceName).WithImageCompressionQuality(60).WithImageFilePath(fmt.Sprintf("M:\\screenshots\\%s\\%d.png", sourceName, time.Now().Unix())).WithImageFormat("png")
+    savePath := fmt.Sprintf("%s\\%s\\%d.png", gc.screenshotDirectory, sourceName,  time.Now().Unix())
+    params := &sources.SaveSourceScreenshotParams{
+        SourceName: &sourceName,
+        ImageFilePath: &savePath,
+        ImageFormat: &gc.screenshotFormat,
+        ImageCompressionQuality: &gc.screenshotQuality,
+
+    }
 	_, err := gc.client.Sources.SaveSourceScreenshot(params)
 
 	return err
