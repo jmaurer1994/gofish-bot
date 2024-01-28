@@ -86,7 +86,7 @@ func (gc *GoobsClient) setSourceVisibility(scene string, sourceId int, visible b
 
 // TODO: use env var for base screenshot location?
 func (gc *GoobsClient) ScreenshotSource(sourceName string) error {
-	params := sources.NewSaveSourceScreenshotParams().WithSourceName(sourceName).WithImageCompressionQuality(100).WithImageFilePath(fmt.Sprintf("M:\\screenshots\\%s", sourceName)).WithImageFormat("png")
+	params := sources.NewSaveSourceScreenshotParams().WithSourceName(sourceName).WithImageCompressionQuality(100).WithImageFilePath(fmt.Sprintf("M:\\screenshots\\%s\\%d.png", sourceName, time.Now().Unix())).WithImageFormat("png")
 	_, err := gc.client.Sources.SaveSourceScreenshot(params)
 
 	return err
