@@ -38,7 +38,7 @@ func (pgc *PGClient) listen() {
 	}
 	defer conn.Release()
 
-    _, err = conn.Exec(context.Background(), "listen SensorEvent:Insert")
+    _, err = conn.Exec(context.Background(), "listen \"SensorEvent:Insert\"")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error listening to event", err)
 		return
@@ -52,6 +52,6 @@ func (pgc *PGClient) listen() {
 		}
 
 		fmt.Println("PID:", notification.PID, "Channel:", notification.Channel, "Payload:", notification.Payload)
-        pgc.scheduler.GenerateEvent("SenesorEvent:Insert", scheduler.Message(notification.Payload))
+        pgc.scheduler.GenerateEvent("SensorEvent:Insert", scheduler.Message(notification.Payload))
 	}
 }
