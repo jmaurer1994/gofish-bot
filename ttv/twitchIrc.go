@@ -37,10 +37,11 @@ func (tic *TwitchIrcClient) Connect() error {
 
 	tic.reader = twitch.IRC()
 
-	if err := tic.reader.Join(tic.Channel); err != nil {
-        return fmt.Errorf("Error joining as reader: %v", err)
+    
+	if err := tic.ConnectToChannel(); err != nil {
+        return fmt.Errorf("Error joining channel as reader: %v", err)
 	}
-	log.Printf("<Connected to channel>[%s:%s]\n", tic.Channel, tic.Username)
+
 	return nil
 }
 
@@ -57,4 +58,13 @@ func (tic *TwitchIrcClient) RegisterHandlers(f HandlerRegistrationFunction) {
 
 func (tic *TwitchIrcClient) SendChannelMessage(message string) {
 	tic.writer.Say(tic.Channel, message)
+}
+
+func (tic *TwitchIrcClient) ConnectToChannel() error {
+   if err := tic.reader.Join(tic.Channel); err != nil {
+        return err
+	}
+	log.Printf("<Connected to channel>[%s:%s]\n", tic.Channel, tic.Username)
+
+    return nil
 }

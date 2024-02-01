@@ -149,7 +149,9 @@ func main() {
 
 func onShardReconnect(shardID int) {
 	log.Printf("Shard #%d reconnected\n", shardID)
-    tic.
+    if err:= tic.ConnectToChannel() ; err != nil {
+        log.Printf("Error reconnecting to channel: %v\n", err)
+    }
 }
 
 func onShardServerNotice(shardID int, sn irc.ServerNotice) {
