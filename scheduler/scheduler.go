@@ -1,7 +1,7 @@
 package scheduler
 
 import (
-	//"fmt"
+	"fmt"
 	"time"
 )
 
@@ -16,7 +16,7 @@ type Task struct {
 }
 
 type Scheduler struct {
-	tasks     []Task
+	tasks     []*Task
 	ec        chan Event
 	listeners map[EventID][]EventHandler
 }
@@ -45,7 +45,7 @@ func (s *Scheduler) RegisterEventHandler(e EventID, F EventHandler) {
 }
 
 func (s *Scheduler) RegisterTask(T Task) {
-	s.tasks = append(s.tasks, T)
+	s.tasks = append(s.tasks, &T)
 }
 
 func (s *Scheduler) GenerateEvent(e EventID, m Message) {
@@ -59,7 +59,7 @@ func (s *Scheduler) GenerateEvent(e EventID, m Message) {
 
 func (s *Scheduler) Start() {
 	for _, task := range s.tasks {
-
+        fmt.Printf("Running task %s\n", task.T)
 		if task.ticker != nil {
 			task.ticker.Reset(task.Interval)
 			continue
@@ -75,7 +75,7 @@ func (s *Scheduler) Start() {
 
 				task.F(s)
 			}
-		}(&task)
+		}(task)
 	}
 }
 

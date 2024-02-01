@@ -112,14 +112,6 @@ func main() {
 	sch := scheduler.NewScheduler()
 
 	sch.RegisterTask(scheduler.Task{
-		T:          "channel:title:update",
-		Enabled:    true,
-		Interval:   time.Duration(5) * time.Minute,
-		F:          UpdateChannelTitle,
-		RunAtStart: true,
-	})
-
-	sch.RegisterTask(scheduler.Task{
 		T:          "source:screenshot:save",
 		Enabled:    true,
 		Interval:   time.Duration(30) * time.Second,
@@ -127,6 +119,14 @@ func main() {
 		RunAtStart: true,
 	})
 
+
+	sch.RegisterTask(scheduler.Task{
+		T:          "channel:title:update",
+		Enabled:    true,
+		Interval:   time.Duration(5) * time.Minute,
+		F:          UpdateChannelTitle,
+		RunAtStart: true,
+	})
 	sch.RegisterEventHandler("camera:light:check", handleCameraLightCheck)
     sch.RegisterEventHandler("ForceSensor:Insert", handleDatabaseEvent)
 
@@ -141,7 +141,7 @@ func main() {
 
 
 
-    db, err = database.NewPGClient(os.Getenv("DB_CONNECTION_URL"), sch)
+   // db, err = database.NewPGClient(os.Getenv("DB_CONNECTION_URL"), sch)
 
 
 	<-sigs
@@ -149,6 +149,7 @@ func main() {
 
 func onShardReconnect(shardID int) {
 	log.Printf("Shard #%d reconnected\n", shardID)
+    tic.
 }
 
 func onShardServerNotice(shardID int, sn irc.ServerNotice) {
