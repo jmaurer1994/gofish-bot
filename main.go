@@ -104,7 +104,7 @@ func main() {
 		ircReader.OnShardServerNotice(onShardServerNotice)
 		ircReader.OnShardLatencyUpdate(onShardLatencyUpdate)
 		ircReader.OnShardMessage(onChannelMessage)
-		ircReader.OnShardRawMessage(onRawMessage)
+		//ircReader.OnShardRawMessage(onRawMessage)
 	})
 
     
@@ -113,7 +113,7 @@ func main() {
 
 	sch.RegisterTask(scheduler.Task{
 		T:          "source:screenshot:save",
-		Enabled:    true,
+		Enabled:    false,
 		Interval:   time.Duration(30) * time.Second,
 		F:          SavePondCameraScreenshot,
 		RunAtStart: true,
@@ -127,6 +127,22 @@ func main() {
 		F:          UpdateChannelTitle,
 		RunAtStart: true,
 	})
+
+    sch.RegisterTask(scheduler.Task{
+        T:          "channel:reader:check",
+        Enabled:    true,
+        Interval:   time.Duration(1) * time.Hour,
+        F:          CheckReaderStatus,
+        RunAtStart: false,
+    })
+
+    sch.RegisterTask(scheduler.Task{
+        T:          "source:camera:cycle",
+        Enabled:    true,
+        Interval:   time.Duration(4) * time.Hour,
+        F:          ResetCamera,
+        RunAtStart: true,
+    })
 	sch.RegisterEventHandler("camera:light:check", handleCameraLightCheck)
     sch.RegisterEventHandler("ForceSensor:Insert", handleDatabaseEvent)
 
@@ -155,11 +171,11 @@ func onShardReconnect(shardID int) {
 }
 
 func onShardServerNotice(shardID int, sn irc.ServerNotice) {
-	log.Printf("Shard #%d recv: %s\n", shardID, sn.Message)
+	log.Printf("Shard #%d recv server notice: %s\n", shardID, sn.Message)
 }
 
 func onShardChannelUserNotice(shardID int, n irc.UserNotice) {
-	log.Printf("Shard #%d recv: %s\n", shardID, n.Message)
+	log.Printf("Shard #%d recv user notice: %s\n", shardID, n.Message)
 }
 
 func onShardLatencyUpdate(shardID int, latency time.Duration) {

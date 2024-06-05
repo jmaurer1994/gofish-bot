@@ -68,3 +68,7 @@ func (tic *TwitchIrcClient) ConnectToChannel() error {
 
     return nil
 }
+
+func (tic *TwitchIrcClient) ReaderIsConnected() (irc.RoomState, bool){
+    return tic.reader.GetChannel(tic.Channel)
+}

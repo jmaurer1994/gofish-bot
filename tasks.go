@@ -89,13 +89,29 @@ func getTimeUntil(start int, target int) *SunEventCountdown {
 }
 
 func SavePondCameraScreenshot(s *scheduler.Scheduler) {
-    if(c.CurrentLightLevel() > 0){
-        return //light on, don't take screenshot
-    }
+	if c.CurrentLightLevel() > 0 {
+		return //light on, don't take screenshot
+	}
 
 	err := gc.ScreenshotSource("PondCamera")
 
 	if err != nil {
 		log.Printf("Could not save screenshot: %v\n", err)
 	}
+}
+
+func CheckReaderStatus(s *scheduler.Scheduler) {
+	var _, connected = tic.ReaderIsConnected()
+
+	if !connected {
+		log.Printf("!! Reader is not connected !!\n")
+		if err := tic.ConnectToChannel(); err != nil {
+			log.Printf("Error while reconnecting to channel!:\n%v\n", err)
+		}
+	}
+}
+
+func ResetCamera(s *scheduler.Scheduler) {
+	gc.ToggleSourceVisibility("Main", "PondCamera")
+	log.Printf("Toggled camera source\n")
 }
