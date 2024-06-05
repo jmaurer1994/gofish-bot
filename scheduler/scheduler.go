@@ -67,13 +67,14 @@ func (s *Scheduler) Start() {
 
 		task.ticker = time.NewTicker(task.Interval)
 		go func(task *Task) {
-			if task.RunAtStart {
+			if task.RunAtStart && task.Enabled {
 				task.F(s)
 			}
 			for {
 				<-task.ticker.C
-
-				task.F(s)
+                if task.Enabled {
+				    task.F(s)
+                }
 			}
 		}(task)
 	}
