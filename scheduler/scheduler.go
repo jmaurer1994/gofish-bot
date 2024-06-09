@@ -1,7 +1,7 @@
 package scheduler
 
 import (
-	"fmt"
+	"log"
 	"time"
 )
 
@@ -59,7 +59,6 @@ func (s *Scheduler) GenerateEvent(e EventID, m Message) {
 
 func (s *Scheduler) Start() {
 	for _, task := range s.tasks {
-        fmt.Printf("Running task %s\n", task.T)
 		if task.ticker != nil {
 			task.ticker.Reset(task.Interval)
 			continue
@@ -68,11 +67,13 @@ func (s *Scheduler) Start() {
 		task.ticker = time.NewTicker(task.Interval)
 		go func(task *Task) {
 			if task.RunAtStart && task.Enabled {
-				task.F(s)
+                log.Printf("[Scheduler]Running task %s\n", task.T)
+                task.F(s)
 			}
 			for {
 				<-task.ticker.C
                 if task.Enabled {
+                    log.Printf("[Scheduler]Running task %s\n", task.T)
 				    task.F(s)
                 }
 			}
