@@ -72,3 +72,7 @@ func (tic *TwitchIrcClient) ConnectToChannel() error {
 func (tic *TwitchIrcClient) ReaderIsConnected() (irc.RoomState, bool){
     return tic.reader.GetChannel(tic.Channel)
 }
+
+func (tic *TwitchIrcClient) Sendf(message string, a ...interface{}) error{
+    return tic.writer.Sayf(tic.Channel, message, a...)
+}

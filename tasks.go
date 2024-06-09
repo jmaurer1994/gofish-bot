@@ -112,6 +112,9 @@ func CheckReaderStatus(s *scheduler.Scheduler) {
 }
 
 func ResetCamera(s *scheduler.Scheduler) {
+    if err := tic.Sendf("Resetting camera... We'll be back in a moment!"); err != nil {
+        log.Printf("Unable to send camera reset notification: %v\n", err)
+    }
 	gc.ToggleSourceVisibility("Main", "PondCamera")
 	log.Printf("Toggled camera source\n")
 }

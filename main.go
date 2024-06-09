@@ -139,7 +139,7 @@ func main() {
         Enabled:    true,
         Interval:   time.Duration(4) * time.Hour,
         F:          ResetCamera,
-        RunAtStart: true,
+        RunAtStart: false,
     })
 	sch.RegisterEventHandler("camera:light:check", handleCameraLightCheck)
     sch.RegisterEventHandler("ForceSensor:Insert", handleDatabaseEvent)
