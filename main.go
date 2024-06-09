@@ -104,10 +104,8 @@ func main() {
 		ircReader.OnShardServerNotice(onShardServerNotice)
 		ircReader.OnShardLatencyUpdate(onShardLatencyUpdate)
 		ircReader.OnShardMessage(onChannelMessage)
-		//ircReader.OnShardRawMessage(onRawMessage)
-	})
-
-    
+		ircReader.OnShardRawMessage(onRawMessage)
+	})  
 
 	sch := scheduler.NewScheduler()
 

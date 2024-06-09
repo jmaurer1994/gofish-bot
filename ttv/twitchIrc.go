@@ -25,9 +25,9 @@ func (tic *TwitchIrcClient) Connect() error {
 	if err != nil {
 		return fmt.Errorf("Error connecting to Twitch IRC\n")
 	}
-
+    log.Printf("Token expiry: %v", token.Expiry)
 	tic.token = *token
-
+    
 	tic.writer = irc.Conn{}
 	tic.writer.SetLogin(tic.Username, "oauth:"+tic.token.AccessToken)
 
@@ -39,7 +39,7 @@ func (tic *TwitchIrcClient) Connect() error {
 
     
 	if err := tic.ConnectToChannel(); err != nil {
-        return fmt.Errorf("Error joining channel as reader: %v", err)
+        return fmt.Errorf("Error joining channel as reader: %v\n", err)
 	}
 
 	return nil
