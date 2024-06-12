@@ -69,6 +69,15 @@ func (tic *TwitchIrcClient) ConnectToChannel() error {
     return nil
 }
 
+func (tic *TwitchIrcClient) DisconnectFromChannel() error {
+    if err := tic.reader.Leave(tic.Channel); err != nil {
+        return err
+    }
+
+    return nil
+}
+
+
 func (tic *TwitchIrcClient) ReaderIsConnected() (irc.RoomState, bool){
     return tic.reader.GetChannel(tic.Channel)
 }

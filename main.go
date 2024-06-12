@@ -25,7 +25,7 @@ var (
 	tic              ttv.TwitchIrcClient
 	gc               *obs.GoobsClient
 	owm              weather.OwmClient
-    db               *database.PGClient
+	db               *database.PGClient
 	c                camera.IpCamera
 	ttvClientId      string
 	ttvChannelName   string
@@ -65,12 +65,12 @@ func main() {
 
 	obsHost := os.Getenv("OBS_HOST")
 	obsPassword := os.Getenv("OBS_PASSWORD")
-    obsScreenshotDirectory := os.Getenv("OBS_SCREENSHOT_DIRECTORY")
-    obsScreenshotFormat := os.Getenv("OBS_SCREENSHOT_FORMAT")
-    obsScreenshotQuality, qualityErr := strconv.ParseFloat(os.Getenv("OBS_SCREENSHOT_QUALITY"), 64)
-    if(qualityErr != nil){
-        log.Fatalf("Could not parse image quality from env value")
-    }
+	obsScreenshotDirectory := os.Getenv("OBS_SCREENSHOT_DIRECTORY")
+	obsScreenshotFormat := os.Getenv("OBS_SCREENSHOT_FORMAT")
+	obsScreenshotQuality, qualityErr := strconv.ParseFloat(os.Getenv("OBS_SCREENSHOT_QUALITY"), 64)
+	if qualityErr != nil {
+		log.Fatalf("Could not parse image quality from env value")
+	}
 
 	gc, err = obs.NewGoobsClient(obsHost, obsPassword, obsScreenshotDirectory, obsScreenshotFormat, obsScreenshotQuality)
 	if err != nil {
@@ -105,7 +105,7 @@ func main() {
 		ircReader.OnShardLatencyUpdate(onShardLatencyUpdate)
 		ircReader.OnShardMessage(onChannelMessage)
 		ircReader.OnShardRawMessage(onRawMessage)
-	})  
+	})
 
 	sch := scheduler.NewScheduler()
 
@@ -117,7 +117,6 @@ func main() {
 		RunAtStart: true,
 	})
 
-
 	sch.RegisterTask(scheduler.Task{
 		T:          "channel:title:update",
 		Enabled:    true,
@@ -126,23 +125,23 @@ func main() {
 		RunAtStart: true,
 	})
 
-    sch.RegisterTask(scheduler.Task{
-        T:          "channel:reader:check",
-        Enabled:    true,
-        Interval:   time.Duration(1) * time.Hour,
-        F:          CheckReaderStatus,
-        RunAtStart: false,
-    })
+	sch.RegisterTask(scheduler.Task{
+		T:          "channel:reader:check",
+		Enabled:    true,
+		Interval:   time.Duration(1) * time.Hour,
+		F:          CheckReaderStatus,
+		RunAtStart: false,
+	})
 
-    sch.RegisterTask(scheduler.Task{
-        T:          "source:camera:cycle",
-        Enabled:    true,
-        Interval:   time.Duration(4) * time.Hour,
-        F:          ResetCamera,
-        RunAtStart: false,
-    })
+	sch.RegisterTask(scheduler.Task{
+		T:          "source:camera:cycle",
+		Enabled:    true,
+		Interval:   time.Duration(4) * time.Hour,
+		F:          ResetCamera,
+		RunAtStart: false,
+	})
 	sch.RegisterEventHandler("camera:light:check", handleCameraLightCheck)
-    sch.RegisterEventHandler("ForceSensor:Insert", handleDatabaseEvent)
+	sch.RegisterEventHandler("ForceSensor:Insert", handleDatabaseEvent)
 
 	// Create a channel to receive os.Signal values.
 	sigs := make(chan os.Signal, 1)
@@ -153,19 +152,27 @@ func main() {
 	log.Println("Starting task scheduler")
 	sch.Start()
 
-
-
-   // db, err = database.NewPGClient(os.Getenv("DB_CONNECTION_URL"), sch)
-
+	// db, err = database.NewPGClient(os.Getenv("DB_CONNECTION_URL"), sch)
 
 	<-sigs
 }
 
 func onShardReconnect(shardID int) {
 	log.Printf("Shard #%d reconnected\n", shardID)
-    if err:= tic.ConnectToChannel() ; err != nil {
-        log.Printf("Error reconnecting to channel: %v\n", err)
-    }
+
+	go func() {
+        if err := tic.DisconnectFromChannel(); err != nil {
+            log.Printf("Error disconnecting from channel: %v\n", err)
+        }
+        log.Printf("Disconnected\n")
+        time.Sleep(3 * time.Second)
+
+		if err := tic.ConnectToChannel(); err != nil {
+			log.Printf("Error reconnecting to channel: %v\n", err)
+		}
+        log.Printf("Reconnected\n")
+	}()
+
 }
 
 func onShardServerNotice(shardID int, sn irc.ServerNotice) {
