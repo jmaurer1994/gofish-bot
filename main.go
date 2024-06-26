@@ -74,7 +74,7 @@ func main() {
 
 	gc, err = obs.NewGoobsClient(obsHost, obsPassword, obsScreenshotDirectory, obsScreenshotFormat, obsScreenshotQuality)
 	if err != nil {
-		log.Fatal("Error creating goobs client")
+		log.Printf("Error creating goobs client\n")
 	}
 
 	owm = weather.OwmClient{
@@ -152,7 +152,10 @@ func main() {
 	log.Println("Starting task scheduler")
 	sch.Start()
 
-	// db, err = database.NewPGClient(os.Getenv("DB_CONNECTION_URL"), sch)
+	db, err = database.NewPGClient(os.Getenv("DB_CONNECTION_URL"), sch)
+	if err != nil {
+		log.Printf("Error creating db client %v\n", err)
+	}
 
 	<-sigs
 }
