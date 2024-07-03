@@ -38,7 +38,7 @@ func (pgc *PGClient) listen() {
 	}
 	defer conn.Release()
 
-    _, err = conn.Exec(context.Background(), "listen \"SensorEvent:Insert\"")
+    _, err = conn.Exec(context.Background(), "listen sensoreventinsert")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error listening to event", err)
 		return

@@ -141,7 +141,7 @@ func main() {
 		RunAtStart: false,
 	})
 	sch.RegisterEventHandler("camera:light:check", handleCameraLightCheck)
-	sch.RegisterEventHandler("ForceSensor:Insert", handleDatabaseEvent)
+	sch.RegisterEventHandler("SensorEvent:Insert", handleDatabaseEvent)
 
 	// Create a channel to receive os.Signal values.
 	sigs := make(chan os.Signal, 1)
