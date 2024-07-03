@@ -41,5 +41,5 @@ func handleDatabaseEvent(s *scheduler.Scheduler, m scheduler.Message) {
 		}
 	}
 
-	tic.SendChannelMessage(fmt.Sprintf("Sensor event registered - did someone pull the string? Force reading: %d", pm))
+	tic.SendChannelMessage(fmt.Sprintf("Food dispensed! Force reading: %d", pm))
 }
