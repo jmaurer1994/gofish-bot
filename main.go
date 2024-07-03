@@ -104,7 +104,7 @@ func main() {
 		ircReader.OnShardServerNotice(onShardServerNotice)
 		ircReader.OnShardLatencyUpdate(onShardLatencyUpdate)
 		ircReader.OnShardMessage(onChannelMessage)
-		ircReader.OnShardRawMessage(onRawMessage)
+        ircReader.OnShardRawMessage(onRawMessage)
 	})
 
 	sch := scheduler.NewScheduler()
@@ -164,13 +164,11 @@ func onShardReconnect(shardID int) {
 	log.Printf("Shard #%d reconnected\n", shardID)
 
 	go func() {
-        if err := tic.DisconnectFromChannel(); err != nil {
-            log.Printf("Error disconnecting from channel: %v\n", err)
-        }
+        tic.Close()
         log.Printf("Disconnected\n")
         time.Sleep(3 * time.Second)
 
-		if err := tic.ConnectToChannel(); err != nil {
+		if err := tic.Connect(); err != nil {
 			log.Printf("Error reconnecting to channel: %v\n", err)
 		}
         log.Printf("Reconnected\n")
