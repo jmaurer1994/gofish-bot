@@ -36,7 +36,7 @@ func handleDatabaseEvent(s *scheduler.Scheduler, m scheduler.Message) {
 	}
     var pm int
 	for i, e := range payload.Samples {
-		if i == 0 || e < pm {
+		if i == 0 || e > pm {
 			pm = e
 		}
 	}
