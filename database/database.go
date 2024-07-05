@@ -69,7 +69,7 @@ func (pgc *PGClient) RetrieveDailyStats() (DailyEventStats, error) {
 	}
 
 	var s DailyEventStats
-	if err := conn.QueryRow(context.Background(), `SELECT * FROM data."v_DailyEventStats`).Scan(&s.Day_event_count, &s.Day_max_force, &s.Day_min_force, &s.Day_avg_force); err != nil {
+	if err := conn.QueryRow(context.Background(), `SELECT * FROM data."v_DailyEventStats"`).Scan(&s.Day_event_count, &s.Day_max_force, &s.Day_min_force, &s.Day_avg_force); err != nil {
 		return DailyEventStats{}, err
 	}
 
@@ -84,7 +84,7 @@ func (pgc *PGClient) RetrieveWeeklyStats() (WeeklyEventStats, error) {
 	}
 
 	var s WeeklyEventStats
-	if err := conn.QueryRow(context.Background(), `SELECT * FROM data."v_WeeklyEventStats`).Scan(&s.Week_total_events, &s.Daily_avg_events, &s.Week_max_force, &s.Week_min_force, &s.Week_avg_force); err != nil {
+	if err := conn.QueryRow(context.Background(), `SELECT * FROM data."v_WeeklyEventStats"`).Scan(&s.Week_total_events, &s.Daily_avg_events, &s.Week_max_force, &s.Week_min_force, &s.Week_avg_force); err != nil {
 		return WeeklyEventStats{}, err
 	}
 
@@ -99,7 +99,7 @@ func (pgc *PGClient) RetrieveMonthlyStats() (MonthlyEventStats, error) {
 	}
 
 	var s MonthlyEventStats
-	if err := conn.QueryRow(context.Background(), `SELECT * FROM data."v_MonthlyEventStats`).Scan(&s.Month_total_events, &s.Daily_avg_events, &s.Month_max_force, &s.Month_min_force, &s.Month_avg_force); err != nil {
+	if err := conn.QueryRow(context.Background(), `SELECT * FROM data."v_MonthlyEventStats"`).Scan(&s.Month_total_events, &s.Daily_avg_events, &s.Month_max_force, &s.Month_min_force, &s.Month_avg_force); err != nil {
 		return MonthlyEventStats{}, err
 	}
 
