@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"github.com/Adeithe/go-twitch/irc"
+	"github.com/joho/godotenv"
 	"log"
 	"os"
 	"os/signal"
@@ -8,9 +11,6 @@ import (
 	"strings"
 	"syscall"
 	"time"
-
-	"github.com/Adeithe/go-twitch/irc"
-	"github.com/joho/godotenv"
 
 	"github.com/jmaurer1994/gofish/bot/camera"
 	"github.com/jmaurer1994/gofish/bot/database"
@@ -104,7 +104,7 @@ func main() {
 		ircReader.OnShardServerNotice(onShardServerNotice)
 		ircReader.OnShardLatencyUpdate(onShardLatencyUpdate)
 		ircReader.OnShardMessage(onChannelMessage)
-        ircReader.OnShardRawMessage(onRawMessage)
+		ircReader.OnShardRawMessage(onRawMessage)
 	})
 
 	sch := scheduler.NewScheduler()
@@ -153,6 +153,7 @@ func main() {
 	sch.Start()
 
 	db, err = database.NewPGClient(os.Getenv("DB_CONNECTION_URL"), sch)
+	db.StartListener()
 	if err != nil {
 		log.Printf("Error creating db client %v\n", err)
 	}
@@ -164,14 +165,14 @@ func onShardReconnect(shardID int) {
 	log.Printf("Shard #%d reconnected\n", shardID)
 
 	go func() {
-        tic.Close()
-        log.Printf("Disconnected\n")
-        time.Sleep(3 * time.Second)
+		tic.Close()
+		log.Printf("Disconnected\n")
+		time.Sleep(3 * time.Second)
 
 		if err := tic.Connect(); err != nil {
 			log.Printf("Error reconnecting to channel: %v\n", err)
 		}
-        log.Printf("Reconnected\n")
+		log.Printf("Reconnected\n")
 	}()
 
 }
@@ -214,6 +215,19 @@ func onChannelMessage(shardID int, msg irc.ChatMessage) {
 				err := gc.ToggleSourceVisibility("Main", "PondCamera")
 				if err != nil {
 					log.Printf("%v\n", err)
+				}
+			}
+
+		case "!stats":
+			if msg.Sender.IsModerator && len(tokens) > 1 {
+				switch tokens[1] {
+				case "daily":
+					dailyStats, err := db.RetrieveDailyStats()
+					if err != nil {
+						log.Printf("Error retrieving daily stats: %v", err)
+						return
+					}
+					tic.SendChannelMessage(fmt.Sprintf("Daily Stats: Food was dispensed %d times today with a max/min/avg force of %f/%f/%f", dailyStats.Day_event_count, dailyStats.Day_max_force, dailyStats.Day_min_force, dailyStats.Day_avg_force))
 				}
 			}
 		}
