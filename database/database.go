@@ -153,18 +153,19 @@ func (pgc *PGClient) listen() {
 		var listenerCtx context.Context
 
 		listenerCtx, pgc.cancelListener = context.WithCancelCause(context.Background())
-		notification, err := conn.Conn().WaitForNotification(listenerCtx)
-
-		log.Printf("ListenerCtx err: %v\n", listenerCtx.Err())
-
-		if err = context.Cause(listenerCtx); err.Error() == listenerCancelError {
-			log.Println("Database listener cancelled")
-			return
-		}
+		notification, err := conn.Conn().WaitForNotification(context.Background())
 
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "Error waiting for notification:", err)
 			return
+		}
+
+		if listenerCtx.Err() != nil {
+			log.Printf("ListenerCtx err: %v\n", listenerCtx.Err())
+			if cause := context.Cause(listenerCtx); cause.Error() == listenerCancelError {
+				log.Println("Database listener cancelled")
+				return
+			}
 		}
 
 		fmt.Println("PID:", notification.PID, "Channel:", notification.Channel, "Payload:", notification.Payload)
