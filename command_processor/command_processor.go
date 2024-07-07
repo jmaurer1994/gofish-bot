@@ -3,6 +3,7 @@ package command_processor
 import (
 	"errors"
 	"github.com/Adeithe/go-twitch/irc"
+	"log"
 	"strings"
 	"time"
 )
@@ -57,11 +58,11 @@ func (cmdproc *CommandProcessor) ProcessCommand(msg irc.ChatMessage) error {
 // TODO: not sure if this needs more length/bounds/etc checking
 func (cmdproc *CommandProcessor) parseCommandFromString(s string) (ParsedCommand, error) {
 	tokens := strings.Fields(s)
-
+	log.Printf("String: %s\nTokens: %v\n", s, tokens)
 	t := []rune(tokens[0])
 
 	p := string(t[0])
-
+	log.Printf("Prefix: %s\n", p)
 	if p != cmdproc.commandPrefix {
 		return ParsedCommand{}, errors.New("Prefix mismatch")
 	}
