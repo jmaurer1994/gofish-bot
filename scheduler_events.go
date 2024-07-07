@@ -7,6 +7,11 @@ import (
 	"log"
 )
 
+func registerSchedulerEvents(sch *scheduler.Scheduler) {
+	sch.RegisterEventHandler("camera:light:check", handleCameraLightCheck)
+	sch.RegisterEventHandler("SensorEvent:Insert", handleDatabaseEvent)
+}
+
 func handleCameraLightCheck(s *scheduler.Scheduler, m scheduler.Message) {
 	log.Printf("Received light check event: %s\n", m)
 	switch m {
@@ -28,13 +33,13 @@ type SensorEventPayload struct {
 }
 
 func handleDatabaseEvent(s *scheduler.Scheduler, m scheduler.Message) {
-    log.Printf("Received sensor event\n")
+	log.Printf("Received sensor event\n")
 	var payload SensorEventPayload
 	if err := json.Unmarshal([]byte(m), &payload); err != nil {
 		log.Printf("Error while unmarshalling payload: %v\n", err)
 		return
 	}
-    var pm int
+	var pm int
 	for i, e := range payload.Samples {
 		if i == 0 || e > pm {
 			pm = e

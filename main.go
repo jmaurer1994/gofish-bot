@@ -1,18 +1,17 @@
 package main
 
 import (
-	"fmt"
-	"github.com/Adeithe/go-twitch/irc"
-	"github.com/joho/godotenv"
 	"log"
 	"os"
 	"os/signal"
 	"strconv"
-	"strings"
 	"syscall"
-	"time"
+
+	"github.com/Adeithe/go-twitch/irc"
+	"github.com/joho/godotenv"
 
 	"github.com/jmaurer1994/gofish/bot/camera"
+	"github.com/jmaurer1994/gofish/bot/command_processor"
 	"github.com/jmaurer1994/gofish/bot/database"
 	"github.com/jmaurer1994/gofish/bot/obs"
 	"github.com/jmaurer1994/gofish/bot/scheduler"
@@ -21,16 +20,14 @@ import (
 )
 
 var (
-	tac              ttv.TwitchApiClient
-	tic              ttv.TwitchIrcClient
-	gc               *obs.GoobsClient
-	owm              weather.OwmClient
-	db               *database.PGClient
-	c                camera.IpCamera
-	ttvClientId      string
-	ttvChannelName   string
-	ttvBroadcasterId string
-	ttvBotUsername   string
+	tac     ttv.TwitchApiClient
+	tic     ttv.TwitchIrcClient
+	gc      *obs.GoobsClient
+	owm     weather.OwmClient
+	db      *database.PGClient
+	c       camera.IpCamera
+	sch     *scheduler.Scheduler
+	cmdproc command_processor.CommandProcessor
 )
 
 func main() {
@@ -39,22 +36,31 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	weatherLatitude, latErr := strconv.ParseFloat(os.Getenv("WEATHER_LATITUDE"), 64)
-	weatherLongitude, longErr := strconv.ParseFloat(os.Getenv("WEATHER_LONGITUDE"), 64)
+	cameraSetup()
+	owmSetup()
+	obsSetup()
+	ttvSetup()
+	schedulerSetup()
 
-	if latErr != nil || longErr != nil {
-		log.Fatalf("Could not parse latitude(%v) or longitude(%v)", latErr, longErr)
+	db, err = database.NewPGClient(os.Getenv("DB_CONNECTION_URL"), sch)
+	db.StartListener()
+
+	cmdproc = command_processor.New("!")
+
+	if err != nil {
+		log.Printf("Error creating db client %v\n", err)
 	}
 
-	ttvClientId = os.Getenv("TTV_CLIENT_ID")
-	ttvClientSecret := os.Getenv("TTV_CLIENT_SECRET")
-	ttvRedirectUri := os.Getenv("TTV_REDIRECT_URI")
-	ttvChannelName = os.Getenv("TTV_CHANNEL_NAME")
-	ttvBroadcasterId = os.Getenv("TTV_BROADCASTER_ID")
-	ttvBotUsername = os.Getenv("TTV_BOT_USERNAME")
+	// Create a channel to receive os.Signal values.operator
+	sigs := make(chan os.Signal, 1)
 
-	ttvAuthServerPort := os.Getenv("TTV_AUTHSERVER_PORT")
+	// Notify the channel if a SIGINT or SIGTERM is received.
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
+	<-sigs
+}
+
+func cameraSetup() {
 	c = camera.IpCamera{
 		Address:  os.Getenv("IPCAMERA_ADDRESS"),
 		Username: os.Getenv("IPCAMERA_USERNAME"),
@@ -62,19 +68,14 @@ func main() {
 	}
 
 	c.ZeroLight()
+}
 
-	obsHost := os.Getenv("OBS_HOST")
-	obsPassword := os.Getenv("OBS_PASSWORD")
-	obsScreenshotDirectory := os.Getenv("OBS_SCREENSHOT_DIRECTORY")
-	obsScreenshotFormat := os.Getenv("OBS_SCREENSHOT_FORMAT")
-	obsScreenshotQuality, qualityErr := strconv.ParseFloat(os.Getenv("OBS_SCREENSHOT_QUALITY"), 64)
-	if qualityErr != nil {
-		log.Fatalf("Could not parse image quality from env value")
-	}
+func owmSetup() {
+	weatherLatitude, latErr := strconv.ParseFloat(os.Getenv("WEATHER_LATITUDE"), 64)
+	weatherLongitude, longErr := strconv.ParseFloat(os.Getenv("WEATHER_LONGITUDE"), 64)
 
-	gc, err = obs.NewGoobsClient(obsHost, obsPassword, obsScreenshotDirectory, obsScreenshotFormat, obsScreenshotQuality)
-	if err != nil {
-		log.Printf("Error creating goobs client\n")
+	if latErr != nil || longErr != nil {
+		log.Fatalf("Could not parse latitude(%v) or longitude(%v)", latErr, longErr)
 	}
 
 	owm = weather.OwmClient{
@@ -82,23 +83,49 @@ func main() {
 		Longitude: weatherLongitude,
 		OwmApiKey: os.Getenv("OWM_API_KEY"),
 	}
+}
 
+func obsSetup() {
+	obsScreenshotQuality, qualityErr := strconv.ParseFloat(os.Getenv("OBS_SCREENSHOT_QUALITY"), 64)
+	if qualityErr != nil {
+		log.Fatalf("Could not parse image quality from env value")
+		obsScreenshotQuality = 0.8
+	}
+	var err error
+	gc, err = obs.NewGoobsClient(os.Getenv("OBS_HOST"), os.Getenv("OBS_PASSWORD"), os.Getenv("OBS_SCREENSHOT_DIRECTORY"), os.Getenv("OBS_SCREENSHOT_FORMAT"), obsScreenshotQuality)
+	if err != nil {
+		log.Printf("Error creating goobs client\n")
+	}
+}
+
+func ttvSetup() {
 	tac = ttv.TwitchApiClient{
-		ClientId:      ttvClientId,
-		BroadcasterId: ttvBroadcasterId,
-		TokenSource:   ttv.NewTwitchTokenSource("api-client", ttvClientId, ttvClientSecret, ttvRedirectUri, ttvAuthServerPort, []string{"channel:manage:broadcast"}),
+		ClientId:      os.Getenv("TTV_CLIENT_ID"),
+		BroadcasterId: os.Getenv("TTV_BROADCASTER_ID"),
+		TokenSource: ttv.NewTwitchTokenSource(
+			"api-client",
+			os.Getenv("TTV_CLIENT_ID"),
+			os.Getenv("TTV_CLIENT_SECRET"),
+			os.Getenv("TTV_REDIRECT_URI"),
+			os.Getenv("TTV_AUTHSERVER_PORT"),
+			[]string{"channel:manage:broadcast"}),
 	}
 
 	tic = ttv.TwitchIrcClient{
-		Channel:     ttvChannelName,
-		Username:    ttvBotUsername,
-		TokenSource: ttv.NewTwitchTokenSource("irc-client", ttvClientId, ttvClientSecret, ttvRedirectUri, ttvAuthServerPort, []string{"user:read:email", "channel:moderate", "chat:edit", "chat:read", "whispers:read", "whispers:edit"}),
+		Channel:  os.Getenv("TTV_CHANNEL_NAME"),
+		Username: os.Getenv("TTV_BOT_USERNAME"),
+		TokenSource: ttv.NewTwitchTokenSource("irc-client",
+			os.Getenv("TTV_CLIENT_ID"),
+			os.Getenv("TTV_CLIENT_SECRET"),
+			os.Getenv("TTV_REDIRECT_URI"),
+			os.Getenv("TTV_AUTHSERVER_PORT"),
+			[]string{"user:read:email", "channel:moderate", "chat:edit", "chat:read", "whispers:read", "whispers:edit"}),
 	}
 
-	err = tic.Connect()
-	if err != nil {
-		log.Fatalf("IRC Error: %v", err)
+	if err := tic.Connect(); err != nil {
+		log.Printf("Twitch IRC error: %v", err)
 	}
+
 	tic.RegisterHandlers(func(ircReader *irc.Client) {
 		ircReader.OnShardReconnect(onShardReconnect)
 		ircReader.OnShardServerNotice(onShardServerNotice)
@@ -106,151 +133,13 @@ func main() {
 		ircReader.OnShardMessage(onChannelMessage)
 		ircReader.OnShardRawMessage(onRawMessage)
 	})
+}
 
-	sch := scheduler.NewScheduler()
-
-	sch.RegisterTask(scheduler.Task{
-		T:          "source:screenshot:save",
-		Enabled:    false,
-		Interval:   time.Duration(30) * time.Second,
-		F:          SavePondCameraScreenshot,
-		RunAtStart: true,
-	})
-
-	sch.RegisterTask(scheduler.Task{
-		T:          "channel:title:update",
-		Enabled:    true,
-		Interval:   time.Duration(5) * time.Minute,
-		F:          UpdateChannelTitle,
-		RunAtStart: true,
-	})
-
-	sch.RegisterTask(scheduler.Task{
-		T:          "channel:reader:check",
-		Enabled:    true,
-		Interval:   time.Duration(1) * time.Hour,
-		F:          CheckReaderStatus,
-		RunAtStart: false,
-	})
-
-	sch.RegisterTask(scheduler.Task{
-		T:          "source:camera:cycle",
-		Enabled:    true,
-		Interval:   time.Duration(4) * time.Hour,
-		F:          ResetCamera,
-		RunAtStart: false,
-	})
-	sch.RegisterEventHandler("camera:light:check", handleCameraLightCheck)
-	sch.RegisterEventHandler("SensorEvent:Insert", handleDatabaseEvent)
-
-	// Create a channel to receive os.Signal values.
-	sigs := make(chan os.Signal, 1)
-
-	// Notify the channel if a SIGINT or SIGTERM is received.
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+func schedulerSetup() {
+	sch = scheduler.NewScheduler()
+	registerSchedulerTasks(sch)
+	registerSchedulerEvents(sch)
 
 	log.Println("Starting task scheduler")
 	sch.Start()
-
-	db, err = database.NewPGClient(os.Getenv("DB_CONNECTION_URL"), sch)
-	db.StartListener()
-	if err != nil {
-		log.Printf("Error creating db client %v\n", err)
-	}
-
-	<-sigs
-}
-
-func onShardReconnect(shardID int) {
-	log.Printf("Shard #%d reconnected\n", shardID)
-
-	go func() {
-		tic.Close()
-		log.Printf("Disconnected\n")
-		time.Sleep(3 * time.Second)
-
-		if err := tic.Connect(); err != nil {
-			log.Printf("Error reconnecting to channel: %v\n", err)
-		}
-		log.Printf("Reconnected\n")
-	}()
-
-}
-
-func onShardServerNotice(shardID int, sn irc.ServerNotice) {
-	log.Printf("Shard #%d recv server notice: %s\n", shardID, sn.Message)
-}
-
-func onShardChannelUserNotice(shardID int, n irc.UserNotice) {
-	log.Printf("Shard #%d recv user notice: %s\n", shardID, n.Message)
-}
-
-func onShardLatencyUpdate(shardID int, latency time.Duration) {
-	log.Printf("Shard #%d has %dms ping\n", shardID, latency.Milliseconds())
-}
-
-// TODO: command processor
-func onChannelMessage(shardID int, msg irc.ChatMessage) {
-	log.Printf("#%s %s: %s\n", msg.Channel, msg.Sender.DisplayName, msg.Text)
-	tokens := strings.Fields(msg.Text)
-	if len(tokens) > 0 {
-		switch tokens[0] {
-		case "!help":
-			tic.SendChannelMessage("Available commands: !help, !info, !clapclap*, !fixcamera*")
-		case "!info":
-			tic.SendChannelMessage("Welcome to the channel and thanks for stopping by! " +
-				"This is an ongoing personal/hobby project - the goal of which is " +
-				"to gather some data and monitor the feeding habits of the pond residents. " +
-				"See below for more information.")
-		case "!clapclap":
-			if msg.Sender.IsModerator {
-				if c.CurrentLightLevel() > 0 {
-					c.ZeroLight()
-				} else {
-					c.IncreaseLight()
-				}
-			}
-		case "!fixcamera":
-			if msg.Sender.IsModerator {
-				err := gc.ToggleSourceVisibility("Main", "PondCamera")
-				if err != nil {
-					log.Printf("%v\n", err)
-				}
-			}
-
-		case "!stats":
-			if msg.Sender.IsModerator && len(tokens) > 1 {
-				switch tokens[1] {
-				case "daily":
-					dailyStats, err := db.RetrieveDailyStats()
-					if err != nil {
-						log.Printf("Error retrieving daily stats: %v", err)
-						tic.SendChannelMessage("Error retrieving daily stats")
-						return
-					}
-					tic.SendChannelMessage(fmt.Sprintf("Daily Stats: Food was dispensed %d times today with a max/min/avg force of %.0f/%.0f/%.0f", dailyStats.Day_event_count, dailyStats.Day_max_force, dailyStats.Day_min_force, dailyStats.Day_avg_force))
-				case "weekly":
-					weeklyStats, err := db.RetrieveWeeklyStats()
-					if err != nil {
-						log.Printf("Error retrieving weekly stats: %v", err)
-						tic.SendChannelMessage("Error retrieving weekly stats")
-						return
-					}
-					tic.SendChannelMessage(fmt.Sprintf("Weekly Stats: Food was dispensed %d times this week with an average of %.0f per day, having a max/min/avg force of %.0f/%.0f/%.0f", weeklyStats.Week_total_events, weeklyStats.Daily_avg_events, weeklyStats.Week_max_force, weeklyStats.Week_min_force, weeklyStats.Week_avg_force))
-				case "monthly":
-					monthlyStats, err := db.RetrieveMonthlyStats()
-					if err != nil {
-						log.Printf("Error retrieving monthly stats: %v", err)
-						tic.SendChannelMessage("Error retrieving monthly stats")
-						return
-					}
-					tic.SendChannelMessage(fmt.Sprintf("Monthly Stats: Food was dispensed %d times this Month with an average of %.0f per day, having a max/min/avg force of %.0f/%.0f/%.0f", monthlyStats.Month_total_events, monthlyStats.Daily_avg_events, monthlyStats.Month_max_force, monthlyStats.Month_min_force, monthlyStats.Month_avg_force))
-				}
-			}
-		}
-	}
-}
-
-func onRawMessage(shardID int, msg irc.Message) {
-	log.Printf("#%s: %s\n", msg.Sender.Username, msg.Raw)
 }

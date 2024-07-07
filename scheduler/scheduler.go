@@ -27,7 +27,7 @@ type EventHandler func(s *Scheduler, m Message)
 
 type Event struct {
 	E EventID
-    M Message
+	M Message
 }
 
 type TaskID string
@@ -36,7 +36,7 @@ type Message string
 
 func NewScheduler() *Scheduler {
 	sch := &Scheduler{}
-    sch.listeners = make(map[EventID][]EventHandler)
+	sch.listeners = make(map[EventID][]EventHandler)
 	return sch
 }
 
@@ -50,7 +50,6 @@ func (s *Scheduler) RegisterTask(T Task) {
 
 func (s *Scheduler) GenerateEvent(e EventID, m Message) {
 	if handlers, ok := s.listeners[e]; ok {
-
 		for _, h := range handlers {
 			go h(s, m)
 		}
@@ -67,15 +66,15 @@ func (s *Scheduler) Start() {
 		task.ticker = time.NewTicker(task.Interval)
 		go func(task *Task) {
 			if task.RunAtStart && task.Enabled {
-                log.Printf("[Scheduler]Running task %s\n", task.T)
-                task.F(s)
+				log.Printf("[Scheduler]Running task %s\n", task.T)
+				task.F(s)
 			}
 			for {
 				<-task.ticker.C
-                if task.Enabled {
-                    log.Printf("[Scheduler]Running task %s\n", task.T)
-				    task.F(s)
-                }
+				if task.Enabled {
+					log.Printf("[Scheduler]Running task %s\n", task.T)
+					task.F(s)
+				}
 			}
 		}(task)
 	}

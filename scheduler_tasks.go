@@ -8,6 +8,40 @@ import (
 	"time"
 )
 
+func registerSchedulerTasks(sch *scheduler.Scheduler) {
+	sch.RegisterTask(scheduler.Task{
+		T:          "source:screenshot:save",
+		Enabled:    false,
+		Interval:   time.Duration(30) * time.Second,
+		F:          SavePondCameraScreenshot,
+		RunAtStart: true,
+	})
+
+	sch.RegisterTask(scheduler.Task{
+		T:          "channel:title:update",
+		Enabled:    true,
+		Interval:   time.Duration(5) * time.Minute,
+		F:          UpdateChannelTitle,
+		RunAtStart: true,
+	})
+
+	sch.RegisterTask(scheduler.Task{
+		T:          "channel:reader:check",
+		Enabled:    true,
+		Interval:   time.Duration(1) * time.Hour,
+		F:          CheckReaderStatus,
+		RunAtStart: false,
+	})
+
+	sch.RegisterTask(scheduler.Task{
+		T:          "source:camera:cycle",
+		Enabled:    true,
+		Interval:   time.Duration(4) * time.Hour,
+		F:          ResetCamera,
+		RunAtStart: false,
+	})
+}
+
 func UpdateChannelTitle(s *scheduler.Scheduler) {
 	w, err := owm.GetCurrentCondiitons()
 
@@ -112,9 +146,9 @@ func CheckReaderStatus(s *scheduler.Scheduler) {
 }
 
 func ResetCamera(s *scheduler.Scheduler) {
-    if err := tic.Sendf("Resetting camera... We'll be back in a moment!"); err != nil {
-        log.Printf("Unable to send camera reset notification: %v\n", err)
-    }
+	if err := tic.Sendf("Resetting camera... We'll be back in a moment!"); err != nil {
+		log.Printf("Unable to send camera reset notification: %v\n", err)
+	}
 	gc.ToggleSourceVisibility("Main", "PondCamera")
 	log.Printf("Toggled camera source\n")
 }
