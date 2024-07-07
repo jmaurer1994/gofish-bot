@@ -46,7 +46,7 @@ func main() {
 	db.StartListener()
 
 	cmdproc = command_processor.New("!")
-
+	registerChatCommands()
 	if err != nil {
 		log.Printf("Error creating db client %v\n", err)
 	}
