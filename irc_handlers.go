@@ -35,7 +35,9 @@ func onShardLatencyUpdate(shardID int, latency time.Duration) {
 }
 
 func onChannelMessage(shardID int, msg irc.ChatMessage) {
-	cmdproc.ProcessCommand(msg)
+	if err := cmdproc.ProcessCommand(msg); err != nil {
+		log.Printf("Error processing command: %v\n", err)
+	}
 }
 
 func onRawMessage(shardID int, msg irc.Message) {
