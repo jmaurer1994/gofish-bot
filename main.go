@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"syscall"
 
-	"github.com/Adeithe/go-twitch/irc"
 	"github.com/joho/godotenv"
 
 	"github.com/jmaurer1994/gofish/bot/camera"
@@ -126,13 +125,7 @@ func ttvSetup() {
 		log.Printf("Twitch IRC error: %v", err)
 	}
 
-	tic.RegisterHandlers(func(ircReader *irc.Client) {
-		ircReader.OnShardReconnect(onShardReconnect)
-		ircReader.OnShardServerNotice(onShardServerNotice)
-		ircReader.OnShardLatencyUpdate(onShardLatencyUpdate)
-		ircReader.OnShardMessage(onChannelMessage)
-		ircReader.OnShardRawMessage(onRawMessage)
-	})
+	registerIrcHandlers()
 }
 
 func schedulerSetup() {

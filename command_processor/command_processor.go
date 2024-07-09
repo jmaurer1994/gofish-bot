@@ -31,7 +31,7 @@ func (cmdproc *CommandProcessor) ProcessCommand(msg irc.ChatMessage) error {
 	pc, err := cmdproc.parseCommandFromString(msg.Text)
 
 	if err != nil {
-		return errors.Join(errors.New("Commad parse error"), err)
+		return errors.Join(errors.New("Command parse error"), err)
 	}
 
 	cmd, ok := cmdproc.chatCommands[pc.key]
@@ -47,10 +47,10 @@ func (cmdproc *CommandProcessor) ProcessCommand(msg irc.ChatMessage) error {
 	if cmd.onCooldown {
 		return errors.New("Command on cooldown")
 	}
-
+	log.Println("Activating cooldown")
 	cmd.activateCooldown()
-
-	cmd.F(pc.args)
+	log.Println("Running command function")
+	go cmd.F(pc.args)
 
 	return nil
 }

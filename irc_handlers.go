@@ -6,6 +6,16 @@ import (
 	"time"
 )
 
+func registerIrcHandlers() {
+	tic.RegisterHandlers(func(ircReader *irc.Client) {
+		ircReader.OnShardReconnect(onShardReconnect)
+		ircReader.OnShardServerNotice(onShardServerNotice)
+		ircReader.OnShardLatencyUpdate(onShardLatencyUpdate)
+		ircReader.OnShardMessage(onChannelMessage)
+		ircReader.OnShardRawMessage(onRawMessage)
+	})
+}
+
 func onShardReconnect(shardID int) {
 	log.Printf("Shard #%d reconnected\n", shardID)
 
@@ -17,6 +27,8 @@ func onShardReconnect(shardID int) {
 		if err := tic.Connect(); err != nil {
 			log.Printf("Error reconnecting to IRC: %v\n", err)
 		}
+
+		registerIrcHandlers()
 		log.Printf("Reconnected\n")
 	}()
 
