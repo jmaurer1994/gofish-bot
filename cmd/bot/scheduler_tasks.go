@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/jmaurer1994/gofish/bot/scheduler"
-	"github.com/jmaurer1994/gofish/bot/weather"
+	"github.com/jmaurer1994/gofish-bot/internal/scheduler"
+	"github.com/jmaurer1994/gofish-bot/internal/weather"
 	"log"
 	"time"
 )

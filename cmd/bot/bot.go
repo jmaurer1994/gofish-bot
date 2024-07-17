@@ -7,15 +7,16 @@ import (
 	"strconv"
 	"syscall"
 
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 
-	"github.com/jmaurer1994/gofish/bot/camera"
-	"github.com/jmaurer1994/gofish/bot/command_processor"
-	"github.com/jmaurer1994/gofish/bot/database"
-	"github.com/jmaurer1994/gofish/bot/obs"
-	"github.com/jmaurer1994/gofish/bot/scheduler"
-	"github.com/jmaurer1994/gofish/bot/ttv"
-	"github.com/jmaurer1994/gofish/bot/weather"
+	"github.com/jmaurer1994/gofish-bot/internal/camera"
+	"github.com/jmaurer1994/gofish-bot/internal/command_processor"
+	"github.com/jmaurer1994/gofish-bot/internal/database"
+	"github.com/jmaurer1994/gofish-bot/internal/obs"
+	"github.com/jmaurer1994/gofish-bot/internal/scheduler"
+	"github.com/jmaurer1994/gofish-bot/internal/ttv"
+	"github.com/jmaurer1994/gofish-bot/internal/weather"
 )
 
 var (
@@ -95,6 +96,14 @@ func obsSetup() {
 	if err != nil {
 		log.Printf("Error creating goobs client\n")
 	}
+
+	router := gin.Default()
+
+	app := obs.Config{Router: router}
+
+	app.Routes()
+
+	router.Run(":8080")
 }
 
 func ttvSetup() {

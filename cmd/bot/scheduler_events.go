@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/jmaurer1994/gofish/bot/scheduler"
+	"github.com/jmaurer1994/gofish-bot/internal/scheduler"
 	"log"
 )
 

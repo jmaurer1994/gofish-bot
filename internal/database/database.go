@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/jmaurer1994/gofish/bot/scheduler"
+	"github.com/jmaurer1994/gofish-bot/internal/scheduler"
 	"log"
 	"os"
 )

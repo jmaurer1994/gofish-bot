@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/jmaurer1994/gofish/bot/command_processor"
+	"github.com/jmaurer1994/gofish-bot/internal/command_processor"
 	"log"
 	"time"
 )
