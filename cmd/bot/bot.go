@@ -103,7 +103,7 @@ func obsSetup() {
 
 	app.Routes()
 
-	router.Run(":8080")
+	go router.Run(":8080")
 }
 
 func ttvSetup() {
