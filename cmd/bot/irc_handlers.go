@@ -20,11 +20,11 @@ func onShardReconnect(shardID int) {
 	log.Printf("Shard #%d reconnected\n", shardID)
 
 	go func() {
-		tic.Close()
+		tic.CloseConnection()
 		log.Printf("Disconnected\n")
 		time.Sleep(3 * time.Second)
 
-		if err := tic.Connect(); err != nil {
+		if err := tic.InitializeConnection(); err != nil {
 			log.Printf("Error reconnecting to IRC: %v\n", err)
 		}
 
@@ -41,7 +41,9 @@ func onShardServerNotice(shardID int, sn irc.ServerNotice) {
 func onShardChannelUserNotice(shardID int, n irc.UserNotice) {
 	log.Printf("Shard #%d recv user notice: %s\n", shardID, n.Message)
 }
-
+func onShareChannelRoomState(shardID int, n irc.RoomState) {
+	log.Printf("Shard #%d recv room state: [%d]%s\n", shardID, n.ID, n.Name)
+}
 func onShardLatencyUpdate(shardID int, latency time.Duration) {
 	log.Printf("Shard #%d has %dms ping\n", shardID, latency.Milliseconds())
 }
