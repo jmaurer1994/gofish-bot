@@ -16,7 +16,7 @@ type Config struct {
 }
 
 func (app *Config) Routes() {
-	app.Router.get("/", app.indexPageHandler())
+	app.Router.GET("/", app.indexPageHandler())
 }
 
 func render(ctx *gin.Context, status int, template templ.Component) error {
