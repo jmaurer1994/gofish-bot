@@ -8,9 +8,8 @@ import (
 )
 
 type CommandProcessor struct {
-	commands      map[string]Command
-	commandPrefix string
-	parser        CommandParser
+	commands map[string]Command
+	parser   CommandParser
 }
 
 func NewCommandProcessor(prefix string) CommandProcessor {

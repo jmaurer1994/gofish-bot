@@ -2,40 +2,40 @@ package main
 
 import (
 	"fmt"
-	"github.com/jmaurer1994/gofish-bot/internal/command_processor"
+	"github.com/jmaurer1994/gofish-bot/internal/commandprocessor"
 	"log"
 	"time"
 )
 
 func registerChatCommands() {
-	cmdproc.RegisterCommand(command_processor.ChatCommand{
+	cmdproc.RegisterCommand(commandprocessor.Command{
 		Key:          "help",
 		F:            botHelp,
 		IsModCommand: false,
 		Cooldown:     10 * time.Second,
 	})
 
-	cmdproc.RegisterCommand(command_processor.ChatCommand{
+	cmdproc.RegisterCommand(commandprocessor.Command{
 		Key:          "info",
 		F:            channelInfo,
 		IsModCommand: false,
 		Cooldown:     1 * time.Minute,
 	})
 
-	cmdproc.RegisterCommand(command_processor.ChatCommand{
+	cmdproc.RegisterCommand(commandprocessor.Command{
 		Key:          "stats",
 		F:            botHelp,
 		IsModCommand: false,
 		Cooldown:     10 * time.Second,
 	})
 
-	cmdproc.RegisterCommand(command_processor.ChatCommand{
+	cmdproc.RegisterCommand(commandprocessor.Command{
 		Key:          "clapclap",
 		F:            toggleLight,
 		IsModCommand: true,
 		Cooldown:     10 * time.Second,
 	})
-	cmdproc.RegisterCommand(command_processor.ChatCommand{
+	cmdproc.RegisterCommand(commandprocessor.Command{
 		Key:          "fixcamera",
 		F:            fixCamera,
 		IsModCommand: true,

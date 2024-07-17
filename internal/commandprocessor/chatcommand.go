@@ -8,7 +8,7 @@ type Command struct {
 	Key          string
 	F            CommandFunction
 	IsModCommand bool
-	cooldown     time.Duration
+	Cooldown     time.Duration
 	onCooldown   bool
 }
 
@@ -20,7 +20,7 @@ func (cmd *Command) activateCooldown() {
 	cmd.setOnCooldown(true)
 
 	go func() {
-		time.Sleep(cmd.cooldown)
+		time.Sleep(cmd.Cooldown)
 		cmd.setOnCooldown(false)
 	}()
 }

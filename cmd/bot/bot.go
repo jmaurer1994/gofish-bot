@@ -11,7 +11,7 @@ import (
 	"github.com/joho/godotenv"
 
 	"github.com/jmaurer1994/gofish-bot/internal/camera"
-	"github.com/jmaurer1994/gofish-bot/internal/command_processor"
+	"github.com/jmaurer1994/gofish-bot/internal/commandprocessor"
 	"github.com/jmaurer1994/gofish-bot/internal/database"
 	"github.com/jmaurer1994/gofish-bot/internal/obs"
 	"github.com/jmaurer1994/gofish-bot/internal/scheduler"
@@ -27,7 +27,7 @@ var (
 	db      *database.PGClient
 	c       camera.IpCamera
 	sch     *scheduler.Scheduler
-	cmdproc command_processor.CommandProcessor
+	cmdproc commandprocessor.CommandProcessor
 )
 
 func main() {
@@ -45,7 +45,7 @@ func main() {
 	db, err = database.NewPGClient(os.Getenv("DB_CONNECTION_URL"), sch)
 	db.StartListener()
 
-	cmdproc = command_processor.New("!")
+	cmdproc = commandprocessor.NewCommandProcessor("!")
 	registerChatCommands()
 	if err != nil {
 		log.Printf("Error creating db client %v\n", err)
@@ -130,7 +130,7 @@ func ttvSetup() {
 			[]string{"user:read:email", "channel:moderate", "chat:edit", "chat:read", "whispers:read", "whispers:edit"}),
 	}
 
-	if err := tic.Connect(); err != nil {
+	if err := tic.InitializeConnection(); err != nil {
 		log.Printf("Twitch IRC error: %v", err)
 	}
 
