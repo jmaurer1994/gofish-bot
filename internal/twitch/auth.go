@@ -1,4 +1,4 @@
-package ttv
+package twitch
 
 import (
 	"context"

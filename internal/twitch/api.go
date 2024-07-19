@@ -1,4 +1,4 @@
-package ttv
+package twitch
 
 import (
 	"bytes"
@@ -63,10 +63,10 @@ func (tac *TwitchApiClient) SetChannelTitle(newTitle string) error {
 	defer resp.Body.Close()
 	// Check for a successful status code
 	if resp.StatusCode != http.StatusNoContent {
-        if(resp.StatusCode == http.StatusUnauthorized){
-           tac.RefreshToken()
-           return tac.SetChannelTitle(newTitle)
-        }
+		if resp.StatusCode == http.StatusUnauthorized {
+			tac.RefreshToken()
+			return tac.SetChannelTitle(newTitle)
+		}
 
 		return fmt.Errorf("API request failed with status code: %d", resp.StatusCode)
 	}

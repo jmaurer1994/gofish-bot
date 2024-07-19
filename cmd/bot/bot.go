@@ -15,13 +15,13 @@ import (
 	"github.com/jmaurer1994/gofish-bot/internal/database"
 	"github.com/jmaurer1994/gofish-bot/internal/obs"
 	"github.com/jmaurer1994/gofish-bot/internal/scheduler"
-	"github.com/jmaurer1994/gofish-bot/internal/ttv"
+	"github.com/jmaurer1994/gofish-bot/internal/twitch"
 	"github.com/jmaurer1994/gofish-bot/internal/weather"
 )
 
 var (
-	tac     ttv.TwitchApiClient
-	tic     ttv.TwitchIrcClient
+	tac     twitch.TwitchApiClient
+	tic     twitch.TwitchIrcClient
 	gc      *obs.GoobsClient
 	owm     weather.OwmClient
 	db      *database.PGClient
@@ -107,10 +107,10 @@ func obsSetup() {
 }
 
 func ttvSetup() {
-	tac = ttv.TwitchApiClient{
+	tac = twitch.TwitchApiClient{
 		ClientId:      os.Getenv("TTV_CLIENT_ID"),
 		BroadcasterId: os.Getenv("TTV_BROADCASTER_ID"),
-		TokenSource: ttv.NewTwitchTokenSource(
+		TokenSource: twitch.NewTwitchTokenSource(
 			"api-client",
 			os.Getenv("TTV_CLIENT_ID"),
 			os.Getenv("TTV_CLIENT_SECRET"),
@@ -119,10 +119,10 @@ func ttvSetup() {
 			[]string{"channel:manage:broadcast"}),
 	}
 
-	tic = ttv.TwitchIrcClient{
+	tic = twitch.TwitchIrcClient{
 		Channel:  os.Getenv("TTV_CHANNEL_NAME"),
 		Username: os.Getenv("TTV_BOT_USERNAME"),
-		TokenSource: ttv.NewTwitchTokenSource("irc-client",
+		TokenSource: twitch.NewTwitchTokenSource("irc-client",
 			os.Getenv("TTV_CLIENT_ID"),
 			os.Getenv("TTV_CLIENT_SECRET"),
 			os.Getenv("TTV_REDIRECT_URI"),
