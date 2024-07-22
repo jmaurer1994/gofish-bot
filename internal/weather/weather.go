@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
+	"strconv"
+
+	"errors"
 )
 
 type OwmClient struct {
@@ -12,6 +16,95 @@ type OwmClient struct {
 
 	Latitude  float64
 	Longitude float64
+}
+
+type OneCallResponse struct {
+	Lat            float64 `json:"lat"`
+	Lon            float64 `json:"lon"`
+	Timezone       string  `json:"timezone"`
+	TimezoneOffset int     `json:"timezone_offset"`
+	Current        struct {
+		Dt         int64   `json:"dt"`
+		Sunrise    int     `json:"sunrise"`
+		Sunset     int     `json:"sunset"`
+		Temp       float64 `json:"temp"`
+		FeelsLike  float64 `json:"feels_like"`
+		Pressure   int     `json:"pressure"`
+		Humidity   int     `json:"humidity"`
+		DewPoint   float64 `json:"dew_point"`
+		Uvi        float64 `json:"uvi"`
+		Clouds     int     `json:"clouds"`
+		Visibility int     `json:"visibility"`
+		WindSpeed  float64 `json:"wind_speed"`
+		WindDeg    int     `json:"wind_deg"`
+		WindGust   float64 `json:"wind_gust"`
+		Weather    []struct {
+			ID          int    `json:"id"`
+			Main        string `json:"main"`
+			Description string `json:"description"`
+			Icon        string `json:"icon"`
+		} `json:"weather"`
+	} `json:"current"`
+	Minutely []struct {
+		Dt            int64   `json:"dt"`
+		Precipitation float64 `json:"precipitation"`
+	} `json:"minutely"`
+	Daily []struct {
+		Dt        int64   `json:"dt"`
+		Sunrise   int     `json:"sunrise"`
+		Sunset    int     `json:"sunset"`
+		Moonrise  int64   `json:"moonrise"`
+		Moonset   int64   `json:"moonset"`
+		MoonPhase float64 `json:"moon_phase"`
+		Temp      struct {
+			Day   float64 `json:"day"`
+			Min   float64 `json:"min"`
+			Max   float64 `json:"max"`
+			Night float64 `json:"night"`
+			Eve   float64 `json:"eve"`
+			Morn  float64 `json:"morn"`
+		} `json:"temp"`
+		FeelsLike struct {
+			Day   float64 `json:"day"`
+			Night float64 `json:"night"`
+			Eve   float64 `json:"eve"`
+			Morn  float64 `json:"morn"`
+		} `json:"feels_like"`
+		Pressure  int     `json:"pressure"`
+		Humidity  int     `json:"humidity"`
+		DewPoint  float64 `json:"dew_point"`
+		WindSpeed float64 `json:"wind_speed"`
+		WindDeg   int     `json:"wind_deg"`
+		WindGust  float64 `json:"wind_gust"`
+		Weather   []struct {
+			ID          int    `json:"id"`
+			Main        string `json:"main"`
+			Description string `json:"description"`
+			Icon        string `json:"icon"`
+		} `json:"weather"`
+		Clouds int     `json:"clouds"`
+		Pop    float64 `json:"pop"`
+		Rain   float64 `json:"rain"`
+		Snow   float64 `json:"snow"`
+		Uvi    float64 `json:"uvi"`
+	} `json:"daily"`
+}
+
+func Setup() (owm *OwmClient, err error) {
+	weatherLatitude, latErr := strconv.ParseFloat(os.Getenv("WEATHER_LATITUDE"), 64)
+	weatherLongitude, longErr := strconv.ParseFloat(os.Getenv("WEATHER_LONGITUDE"), 64)
+
+	if latErr != nil || longErr != nil {
+		err = errors.New(fmt.Sprintf("Could not parse latitude(%v) or longitude(%v)", latErr, longErr))
+	}
+
+	owm = &OwmClient{
+		Latitude:  weatherLatitude,
+		Longitude: weatherLongitude,
+		OwmApiKey: os.Getenv("OWM_API_KEY"),
+	}
+
+	return
 }
 
 func (owm *OwmClient) GetCurrentCondiitons() (OneCallResponse, error) {
@@ -109,76 +202,4 @@ func LunarPhaseValueToEmoji(lpv float64) (string, error) {
 	}
 
 	return lunarPhaseIcon, nil
-}
-
-type OneCallResponse struct {
-	Lat            float64 `json:"lat"`
-	Lon            float64 `json:"lon"`
-	Timezone       string  `json:"timezone"`
-	TimezoneOffset int     `json:"timezone_offset"`
-	Current        struct {
-		Dt         int64   `json:"dt"`
-		Sunrise    int     `json:"sunrise"`
-		Sunset     int     `json:"sunset"`
-		Temp       float64 `json:"temp"`
-		FeelsLike  float64 `json:"feels_like"`
-		Pressure   int     `json:"pressure"`
-		Humidity   int     `json:"humidity"`
-		DewPoint   float64 `json:"dew_point"`
-		Uvi        float64 `json:"uvi"`
-		Clouds     int     `json:"clouds"`
-		Visibility int     `json:"visibility"`
-		WindSpeed  float64 `json:"wind_speed"`
-		WindDeg    int     `json:"wind_deg"`
-		WindGust   float64 `json:"wind_gust"`
-		Weather    []struct {
-			ID          int    `json:"id"`
-			Main        string `json:"main"`
-			Description string `json:"description"`
-			Icon        string `json:"icon"`
-		} `json:"weather"`
-	} `json:"current"`
-	Minutely []struct {
-		Dt            int64   `json:"dt"`
-		Precipitation float64 `json:"precipitation"`
-	} `json:"minutely"`
-	Daily []struct {
-		Dt        int64   `json:"dt"`
-		Sunrise   int     `json:"sunrise"`
-		Sunset    int     `json:"sunset"`
-		Moonrise  int64   `json:"moonrise"`
-		Moonset   int64   `json:"moonset"`
-		MoonPhase float64 `json:"moon_phase"`
-		Temp      struct {
-			Day   float64 `json:"day"`
-			Min   float64 `json:"min"`
-			Max   float64 `json:"max"`
-			Night float64 `json:"night"`
-			Eve   float64 `json:"eve"`
-			Morn  float64 `json:"morn"`
-		} `json:"temp"`
-		FeelsLike struct {
-			Day   float64 `json:"day"`
-			Night float64 `json:"night"`
-			Eve   float64 `json:"eve"`
-			Morn  float64 `json:"morn"`
-		} `json:"feels_like"`
-		Pressure  int     `json:"pressure"`
-		Humidity  int     `json:"humidity"`
-		DewPoint  float64 `json:"dew_point"`
-		WindSpeed float64 `json:"wind_speed"`
-		WindDeg   int     `json:"wind_deg"`
-		WindGust  float64 `json:"wind_gust"`
-		Weather   []struct {
-			ID          int    `json:"id"`
-			Main        string `json:"main"`
-			Description string `json:"description"`
-			Icon        string `json:"icon"`
-		} `json:"weather"`
-		Clouds int     `json:"clouds"`
-		Pop    float64 `json:"pop"`
-		Rain   float64 `json:"rain"`
-		Snow   float64 `json:"snow"`
-		Uvi    float64 `json:"uvi"`
-	} `json:"daily"`
 }

@@ -14,6 +14,7 @@ import (
 	"github.com/jmaurer1994/gofish-bot/internal/commandprocessor"
 	"github.com/jmaurer1994/gofish-bot/internal/database"
 	"github.com/jmaurer1994/gofish-bot/internal/obs"
+	"github.com/jmaurer1994/gofish-bot/internal/overlay"
 	"github.com/jmaurer1994/gofish-bot/internal/scheduler"
 	"github.com/jmaurer1994/gofish-bot/internal/twitch"
 	"github.com/jmaurer1994/gofish-bot/internal/weather"
@@ -23,7 +24,7 @@ var (
 	tac     twitch.TwitchApiClient
 	tic     twitch.TwitchIrcClient
 	gc      *obs.GoobsClient
-	owm     weather.OwmClient
+	owm     *weather.OwmClient
 	db      *database.PGClient
 	c       camera.IpCamera
 	sch     *scheduler.Scheduler
@@ -37,7 +38,7 @@ func main() {
 	}
 
 	cameraSetup()
-	owmSetup()
+	owm = weather.Setup()
 	obsSetup()
 	ttvSetup()
 	schedulerSetup()
@@ -70,21 +71,6 @@ func cameraSetup() {
 	c.ZeroLight()
 }
 
-func owmSetup() {
-	weatherLatitude, latErr := strconv.ParseFloat(os.Getenv("WEATHER_LATITUDE"), 64)
-	weatherLongitude, longErr := strconv.ParseFloat(os.Getenv("WEATHER_LONGITUDE"), 64)
-
-	if latErr != nil || longErr != nil {
-		log.Fatalf("Could not parse latitude(%v) or longitude(%v)", latErr, longErr)
-	}
-
-	owm = weather.OwmClient{
-		Latitude:  weatherLatitude,
-		Longitude: weatherLongitude,
-		OwmApiKey: os.Getenv("OWM_API_KEY"),
-	}
-}
-
 func obsSetup() {
 	obsScreenshotQuality, qualityErr := strconv.ParseFloat(os.Getenv("OBS_SCREENSHOT_QUALITY"), 64)
 	if qualityErr != nil {
@@ -97,13 +83,7 @@ func obsSetup() {
 		log.Printf("Error creating goobs client\n")
 	}
 
-	router := gin.Default()
-
-	app := obs.Config{Router: router}
-
-	app.Routes()
-
-	go router.Run(":8080")
+	overlay.StartOverlay()
 }
 
 func ttvSetup() {

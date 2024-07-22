@@ -1,0 +1,24 @@
+package views
+
+import (
+    "github.com/jmaurer1994/gofish-bot/internal/overlay/views/components"
+)
+
+templ Index() {
+    <!DOCTYPE html>
+    <html lang="en">
+        @components.Header()
+        <body>
+        <div class="canvas" hx-ext="sse" sse-connect="/stream">
+            <div sse-swap="weather">
+                @components.WeatherWidget()
+            </div>
+            <div sse-swap="time">
+                @components.TimeWidget("test")
+            </div>
+        </div>
+        </body>
+    </html>
+}
+
+
