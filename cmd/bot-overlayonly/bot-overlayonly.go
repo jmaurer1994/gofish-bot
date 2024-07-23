@@ -22,7 +22,7 @@ func main() {
 	// Notify the channel if a SIGINT or SIGTERM is received.
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	log.Println("Starting overlay")
-
+	go timeUpdate()
 	<-sigs
 }
 
