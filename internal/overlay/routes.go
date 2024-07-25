@@ -9,24 +9,7 @@ import (
 )
 
 func (app *Config) Routes() {
-	app.Router.GET("/stream", HeadersMiddleware(), app.Event.serveHTTP(), func(c *gin.Context) {
-		v, ok := c.Get("clientChan")
-		if !ok {
-			return
-		}
-		clientChan, ok := v.(ClientChan)
-		if !ok {
-			return
-		}
-		c.Stream(func(w io.Writer) bool {
-			// Stream message to client from message channel
-			if msg, ok := <-clientChan; ok {
-				c.SSEvent(msg.Channel, msg.Data)
-				return true
-			}
-			return false
-		})
-	})
+	app.Router.GET("/stream", HeadersMiddleware(), app.Event.serveHTTP(), app.eventHandler())
 
 	app.Router.GET("/", app.indexPageHandler())
 
@@ -34,6 +17,26 @@ func (app *Config) Routes() {
 	app.Router.StaticFile("/style.css", "../../resources/style.css")
 }
 
+func (app *Config) eventHandler() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		v, ok := ctx.Get("clientChan")
+		if !ok {
+			return
+		}
+		clientChan, ok := v.(ClientChan)
+		if !ok {
+			return
+		}
+		ctx.Stream(func(w io.Writer) bool {
+			// Stream message to client from message channel
+			if msg, ok := <-clientChan; ok {
+				ctx.SSEvent(msg.Channel, msg.Data)
+				return true
+			}
+			return false
+		})
+	}
+}
 func (app *Config) indexPageHandler() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		_, cancel := context.WithTimeout(context.Background(), appTimeout)
