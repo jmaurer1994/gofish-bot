@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"syscall"
 
-	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 
 	"github.com/jmaurer1994/gofish-bot/internal/camera"
