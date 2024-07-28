@@ -13,9 +13,10 @@ func (app *Config) Routes() {
 
 	app.Router.GET("/", app.indexPageHandler())
 
-	app.Router.Static("/assets", "../../assets")
-	app.Router.StaticFile("/style.css", "../../resources/style.css")
-	app.Router.StaticFile("/main.js", "../../resources/main.js")
+	app.Router.Static("/assets", "./assets")
+	app.Router.StaticFile("/style.css", "./resources/style.css")
+	app.Router.StaticFile("/main.js", "./resources/main.js")
+
 }
 
 func (app *Config) eventHandler() gin.HandlerFunc {
