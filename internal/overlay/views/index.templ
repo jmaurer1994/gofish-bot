@@ -7,14 +7,11 @@ templ Index() {
 	<html lang="en">
 		@components.Header()
 		<body>
-			<div class="canvas">
-				<div class="container" hx-ext="sse" sse-connect="/stream">
-					<div sse-swap="weather">
-						@components.WeatherWidget()
-					</div>
-					<div sse-swap="time">
-						@components.TimeWidget("test")
-					</div>
+			<div class="container" hx-ext="sse" sse-connect="/stream">
+				<div class="overlay"><span></span></div>
+				<div class="icon-bar">
+					@components.WeatherWidget([]string{"01d"}, "75", "23.5", "18", "Waxing Crescent", "moon-new")
+					@components.TimeWidget("10", "20", "moonrise")
 				</div>
 			</div>
 		</body>

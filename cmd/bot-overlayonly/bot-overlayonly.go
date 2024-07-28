@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/jmaurer1994/gofish-bot/internal/overlay"
 	"github.com/jmaurer1994/gofish-bot/internal/overlay/views/components"
 	"log"
@@ -29,13 +28,12 @@ func main() {
 func timeUpdate() {
 	for {
 
-		time.Sleep(time.Second * 10)
-		now := time.Now().Format("2006-01-02 15:04:05")
-		currentTime := fmt.Sprintf("The Current Time Is %v", now)
+		time.Sleep(time.Second * 100)
+		//		currentTime := fmt.Sprintf("The Current Time Is %v", now)
 
 		// Send current time to clients message channel
-		component := components.TimeWidget(currentTime)
-
+		component := components.TimeWidget("10", "30", "moonrise")
+		event.RenderSSE("weather", components.WeatherWidget([]string{"01d"}, "72", "23.5", "55", "Full Moon", "moon-full"))
 		event.RenderSSE("time", component)
 	}
 }

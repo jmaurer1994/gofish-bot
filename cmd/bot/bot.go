@@ -29,6 +29,7 @@ var (
 	c       camera.IpCamera
 	sch     *scheduler.Scheduler
 	cmdproc commandprocessor.CommandProcessor
+	event   *overlay.Event
 )
 
 func main() {
@@ -38,7 +39,7 @@ func main() {
 	}
 
 	cameraSetup()
-	owm = weather.Setup()
+	owm, err = weather.Setup()
 	obsSetup()
 	ttvSetup()
 	schedulerSetup()
@@ -83,7 +84,7 @@ func obsSetup() {
 		log.Printf("Error creating goobs client\n")
 	}
 
-	overlay.StartOverlay()
+	event = overlay.StartOverlay()
 }
 
 func ttvSetup() {

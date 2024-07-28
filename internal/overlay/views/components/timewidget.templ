@@ -1,5 +1,15 @@
 package components
 
-templ TimeWidget(time string) {
-	<div>{ time }</div>
+import "fmt"
+
+templ TimeWidget(hours string, minutes string, icon string) {
+	<div sse-swap="time" hx-swap="outerHTML" class="countdown">
+		<div class="hours">
+			{ hours }
+		</div>
+		<div class="minutes">
+			{ minutes }
+		</div>
+		<img src={ fmt.Sprintf("/assets/weather/bas/%s.svg", icon) }/>
+	</div>
 }

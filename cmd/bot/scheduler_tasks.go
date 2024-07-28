@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/jmaurer1994/gofish-bot/internal/overlay/views/components"
 	"github.com/jmaurer1994/gofish-bot/internal/scheduler"
 	"github.com/jmaurer1994/gofish-bot/internal/weather"
 	"log"
@@ -21,7 +22,7 @@ func registerSchedulerTasks(sch *scheduler.Scheduler) {
 		T:          "channel:title:update",
 		Enabled:    true,
 		Interval:   time.Duration(5) * time.Minute,
-		F:          UpdateChannelTitle,
+		F:          UpdateOverlay,
 		RunAtStart: true,
 	})
 
@@ -42,7 +43,7 @@ func registerSchedulerTasks(sch *scheduler.Scheduler) {
 	})
 }
 
-func UpdateChannelTitle(s *scheduler.Scheduler) {
+func UpdateOverlay(s *scheduler.Scheduler) {
 	w, err := owm.GetCurrentCondiitons()
 
 	if err != nil {
@@ -55,7 +56,8 @@ func UpdateChannelTitle(s *scheduler.Scheduler) {
 	var (
 		nextSunEvent          string
 		nextSunEventCountdown *SunEventCountdown
-		lunarPhaseIcon        string
+		phaseText             string
+		phaseIcon             string
 	)
 
 	riseTime := w.Current.Sunrise - currentTime
@@ -70,10 +72,10 @@ func UpdateChannelTitle(s *scheduler.Scheduler) {
 			s.GenerateEvent("camera:light:check", "off")
 		}
 	} else if setTime > 0 {
-		nextSunEvent = "sunset"
+		nextSunEvent = "moonrise"
 		nextSunEventCountdown = getTimeUntil(currentTime, w.Current.Sunset)
 
-		if nextSunEventCountdown.hours < 1 && nextSunEventCountdown.minutes <= 10 {
+		if nextSunEventCountdown.hours < 1 && nextSunEventCountdown.minutes == 0 {
 			log.Println("Generating camera light on event")
 			s.GenerateEvent("camera:light:check", "on")
 		}
@@ -84,28 +86,19 @@ func UpdateChannelTitle(s *scheduler.Scheduler) {
 		nextSunEventCountdown = getTimeUntil(currentTime, w.Daily[1].Sunrise)
 	}
 
-	celcius := weather.FToC(w.Current.Temp)
-	conditionIcon := weather.GetConditionIcon(w.Current.Weather[0].Icon)
-
-	lunarPhaseIcon, err = weather.LunarPhaseValueToEmoji(w.Daily[0].MoonPhase)
+	phaseText, phaseIcon, err = weather.LunarPhaseValueToString(w.Daily[0].MoonPhase)
 	if err != nil {
 		log.Printf("Could not get get lunar phase icon: %v\n", err)
 		return
 	}
 
-	conditionsString := fmt.Sprintf("[%s %s(%.0f°F/%.1f°C)]", conditionIcon, lunarPhaseIcon, w.Current.Temp, celcius)
-
-	sunEventString := fmt.Sprintf("[%dh %dm until %s]", nextSunEventCountdown.hours, nextSunEventCountdown.minutes, nextSunEvent)
-	newTitle := "go🐟fish " + conditionsString + sunEventString
-
-	err = tac.SetChannelTitle(newTitle)
-
-	if err != nil {
-		log.Printf("Could not set channel title, %v\n", err)
-		return
+	conditions := make([]string, 0)
+	for _, condition := range w.Current.Weather {
+		conditions = append(conditions, condition.Icon)
 	}
 
-	log.Printf("<Channel title updated>[%s]\n", newTitle)
+	event.RenderSSE("weather", components.WeatherWidget(conditions, fmt.Sprintf("%.0f", w.Current.Temp), fmt.Sprintf("%.1f", weather.FToC(w.Current.Temp)), fmt.Sprintf("%d", w.Current.Humidity), phaseText, phaseIcon))
+	event.RenderSSE("time", components.TimeWidget(string(nextSunEventCountdown.hours), string(nextSunEventCountdown.minutes), nextSunEvent))
 }
 
 type SunEventCountdown struct {

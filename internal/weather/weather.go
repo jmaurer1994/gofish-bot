@@ -108,17 +108,6 @@ func Setup() (owm *OwmClient, err error) {
 }
 
 func (owm *OwmClient) GetCurrentCondiitons() (OneCallResponse, error) {
-	w, err := owm.getOwmData()
-
-	if err != nil {
-		return OneCallResponse{}, fmt.Errorf("Could not retrieve owm data: %v", err)
-	}
-
-	return w, nil
-
-}
-
-func (owm *OwmClient) getOwmData() (OneCallResponse, error) {
 	url := fmt.Sprintf("https://api.openweathermap.org/data/3.0/onecall?lat=%f&lon=%f&exclude=hourly,minutely,alerts&units=imperial&appid=%s", owm.Latitude, owm.Longitude, owm.OwmApiKey)
 
 	resp, err := http.Get(url)
@@ -177,6 +166,41 @@ func GetConditionIcon(iconValue string) string {
 	return ""
 }
 
+func LunarPhaseValueToString(lpv float64) (string, string, error) {
+	if lpv < 0 || lpv >= 1 {
+		return "", "", fmt.Errorf("Invalid phase value: %v, expected [0,1)", lpv)
+	}
+	var phaseIcon string
+	var phaseText string
+	switch {
+	case lpv == 0:
+		phaseText = "New Moon"
+		phaseIcon = "moon-new"
+	case lpv < 0.25:
+		phaseText = "Waxing Crescent"
+		phaseIcon = "moon-waxing-crescent"
+	case lpv == 0.25:
+		phaseText = "First Quarter"
+		phaseIcon = "moon-first-quarter"
+	case lpv < 0.5:
+		phaseText = "Waxing Gibbous"
+		phaseIcon = "moon-waxing-gibbous"
+	case lpv == 0.5:
+		phaseText = "Full Moon"
+		phaseIcon = "moon-full"
+	case lpv < 0.75:
+		phaseText = "Waning Gibbous"
+		phaseIcon = "moon-waning-gibbous"
+	case lpv == 0.75:
+		phaseText = "Last Quarter"
+		phaseIcon = "moon-last-quarter"
+	case lpv < 1:
+		phaseText = "Waning Crescent"
+		phaseIcon = "moon-waning-crescent"
+	}
+
+	return phaseText, phaseIcon, nil
+}
 func LunarPhaseValueToEmoji(lpv float64) (string, error) {
 	if lpv < 0 || lpv >= 1 {
 		return "", fmt.Errorf("Invalid phase value: %v, expected [0,1)", lpv)

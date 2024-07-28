@@ -1,9 +1,37 @@
 package components
 
-templ WeatherWidget() {
-	<div>
-		<img src="/assets/weather/sun2.gif"/>
-		<img src="/assets/weather/cloudy1.png"/>
-		<img src="/assets/weather/rain.png"/>
+import "fmt"
+
+templ WeatherWidget(conditions []string, f string, c string, humidity string, phaseText string, phase string) {
+	<div class="weather" sse-swap="weather" hx-swap="outerHTML">
+		for i, condition := range conditions {
+			if i == 0 {
+				@ActiveWeatherIcon(condition)
+			} else {
+				@HiddenWeatherIcon(condition)
+			}
+		}
+		<div class="weather-info temperature fade active">
+			<span>{ f }</span>
+			<img src={ fmt.Sprintf("/assets/weather/bas/thermometer-fahrenheit.svg") }/>
+			<span>{ c }</span>
+			<img src={ fmt.Sprintf("/assets/weather/bas/thermometer-celsius.svg") }/>
+		</div>
+		<div class="weather-info humidity fade hidden">
+			<span>{ humidity }</span>
+			<img src={ fmt.Sprintf("/assets/weather/bas/humidity.svg") }/>
+		</div>
+		<div class="weather-info moon fade hidden">
+			<span>{ phaseText }</span>
+			<img src={ fmt.Sprintf("/assets/weather/bas/%s.svg", phase) }/>
+		</div>
 	</div>
+}
+
+templ ActiveWeatherIcon(condition string) {
+	<img class="weather-icon fade active" src={ fmt.Sprintf("/assets/weather/bas/openweathermap/%s.svg", condition) }/>
+}
+
+templ HiddenWeatherIcon(condition string) {
+	<img class="weather-icon fade hidden" src={ fmt.Sprintf("/assets/weather/bas/openweathermap/%s.svg", condition) }/>
 }

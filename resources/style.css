@@ -1,13 +1,167 @@
+:root {
+    --overlay-border-color: rgb(00, 37, 68, 1);
+    --icon-bar-bg-color: rgb(25, 37, 68, 1);
+}
+
+* {
+    box-sizing: border-box;
+}
+
 body {
     margin: 0;
     padding: 0;
+    background-color: rgb(0, 0, 0, 0);
 }
 
 .container {
-    border: 1px solid black;
-}
-
-.canvas {
     width: 1920px;
     height: 1080px;
+    position: relative;
+}
+
+.overlay {
+    width: 95%;
+    height: 95%;
+    z-index: 10;
+
+    box-sizing: border-box;
+
+    border: 5px solid var(--overlay-border-color);
+    border-radius: 8px;
+
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+
+    margin: auto;
+}
+
+.icon-bar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    z-index: 20;
+
+    height: 100px;
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+}
+
+.weather {
+    height: 100px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+
+    background-color: rgb(180, 180, 180, 1);
+    border-top-left-radius: 50px;
+    border-bottom-left-radius: 50px;
+}
+
+.weather-info {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+
+    width: 250px;
+
+}
+
+.temperature span {
+    margin-right: -25px;
+}
+
+.humidity span {
+    margin-right: -20px;
+}
+
+.moon span {
+    font-size: 1.5rem !important;
+}
+
+.weather-info span {
+    font-size: 2.0rem;
+    font-weight: bold;
+    font-family: arial;
+}
+
+.weather-info img {
+    width: 80px;
+    height: 80px;
+}
+
+.weather-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0px 10px;
+    border-radius: 40px;
+    border: 1px solid rgb(0, 0, 0, 0.3);
+    background-color: rgb(0, 0, 0, 0.2);
+}
+
+.countdown img {
+    width: 80px;
+    height: 80px;
+    margin-right: 10px;
+    background-color: rgb(0, 0, 0, .3);
+    border-top-right-radius: 40px;
+    border-bottom-right-radius: 40px;
+}
+
+.active {
+    display: flex;
+}
+
+.hidden {
+    display: none;
+}
+
+.countdown {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    background: #6684b3;
+    border-top-right-radius: 50px;
+    border-bottom-right-radius: 50px;
+    height: 100px;
+}
+
+.countdown div {
+    font-size: 2.5rem;
+    font-weight: bold;
+    font-family: arial;
+    border: 2px solid #ffffffeb;
+    background-color: #ffffffcc;
+    border-radius: 8px;
+    height: 80px;
+    line-height: 80px;
+    box-shadow: 2px 2px 5px black;
+}
+
+.hours {
+    margin-left: 20px;
+    margin-right: 3px;
+}
+
+.fade {
+    animation-name: fade;
+    animation-duration: 2.0s;
+}
+
+@keyframes fade {
+    from {
+        opacity: .4
+    }
+
+    to {
+        opacity: 1
+    }
 }
