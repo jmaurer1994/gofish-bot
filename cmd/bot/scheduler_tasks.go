@@ -55,7 +55,7 @@ func UpdateOverlay(s *scheduler.Scheduler) {
 
 	var (
 		nextSunEvent          string
-		nextSunEventCountdown *SunEventCountdown
+		nextSunEventCountdown SunEventCountdown
 		phaseText             string
 		phaseIcon             string
 	)
@@ -98,7 +98,7 @@ func UpdateOverlay(s *scheduler.Scheduler) {
 	}
 
 	event.RenderSSE("weather", components.WeatherWidget(conditions, fmt.Sprintf("%.0f", w.Current.Temp), fmt.Sprintf("%.1f", weather.FToC(w.Current.Temp)), fmt.Sprintf("%d", w.Current.Humidity), phaseText, phaseIcon))
-	event.RenderSSE("time", components.TimeWidget(string(nextSunEventCountdown.hours), string(nextSunEventCountdown.minutes), nextSunEvent))
+	event.RenderSSE("time", components.TimeWidget(fmt.Sprintf("%d", nextSunEventCountdown.hours), fmt.Sprintf("%d", nextSunEventCountdown.minutes), nextSunEvent))
 }
 
 type SunEventCountdown struct {
@@ -106,10 +106,10 @@ type SunEventCountdown struct {
 	minutes int
 }
 
-func getTimeUntil(start int, target int) *SunEventCountdown {
+func getTimeUntil(start int, target int) SunEventCountdown {
 	minutes := ((target - start) % 3600) / 60
 	approxMinutes := minutes - (minutes % 5)
-	return &SunEventCountdown{
+	return SunEventCountdown{
 		hours:   (target - start) / 3600,
 		minutes: approxMinutes,
 	}
