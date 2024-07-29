@@ -101,7 +101,7 @@ func UpdateOverlay(s *scheduler.Scheduler) {
 
 	event.RenderSSE("weather", components.WeatherWidget(conditions, fmt.Sprintf("%.0f", w.Current.Temp), fmt.Sprintf("%.1f", weather.FToC(w.Current.Temp)), fmt.Sprintf("%d", w.Current.Humidity), phaseText, phaseIcon))
 
-	log.Printf("Time: %02d %0d2", nextSunEventCountdown.hours, nextSunEventCountdown.minutes)
+	log.Printf("Time: %02d %02d", nextSunEventCountdown.hours, nextSunEventCountdown.minutes)
 
 	event.RenderSSE("time", components.TimeWidget(fmt.Sprintf("%02d", nextSunEventCountdown.hours), fmt.Sprintf("%02d", nextSunEventCountdown.minutes), nextSunEvent))
 }
