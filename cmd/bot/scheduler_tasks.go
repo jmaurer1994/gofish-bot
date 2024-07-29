@@ -19,7 +19,7 @@ func registerSchedulerTasks(sch *scheduler.Scheduler) {
 	})
 
 	sch.RegisterTask(scheduler.Task{
-		T:          "channel:title:update",
+		T:          "channel:overlay:update",
 		Enabled:    true,
 		Interval:   time.Duration(5) * time.Minute,
 		F:          UpdateOverlay,
@@ -97,7 +97,12 @@ func UpdateOverlay(s *scheduler.Scheduler) {
 		conditions = append(conditions, condition.Icon)
 	}
 
+	log.Println("Updating weather")
+
 	event.RenderSSE("weather", components.WeatherWidget(conditions, fmt.Sprintf("%.0f", w.Current.Temp), fmt.Sprintf("%.1f", weather.FToC(w.Current.Temp)), fmt.Sprintf("%d", w.Current.Humidity), phaseText, phaseIcon))
+
+	log.Printf("Time: %02d %0d2", nextSunEventCountdown.hours, nextSunEventCountdown.minutes)
+
 	event.RenderSSE("time", components.TimeWidget(fmt.Sprintf("%02d", nextSunEventCountdown.hours), fmt.Sprintf("%02d", nextSunEventCountdown.minutes), nextSunEvent))
 }
 
