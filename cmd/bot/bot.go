@@ -52,6 +52,8 @@ func main() {
 		log.Printf("Error creating db client %v\n", err)
 	}
 
+	log.Println("Starting task scheduler")
+	sch.Start()
 	// Create a channel to receive os.Signal values.operator
 	sigs := make(chan os.Signal, 1)
 
@@ -122,6 +124,4 @@ func schedulerSetup() {
 	registerSchedulerTasks(sch)
 	registerSchedulerEvents(sch)
 
-	log.Println("Starting task scheduler")
-	sch.Start()
 }
