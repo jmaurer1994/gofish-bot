@@ -190,6 +190,6 @@ func UpdateFeederCapacity(s *scheduler.Scheduler) {
 	}
 
 	capacity := f / 1500.00
-
+	log.Printf("Feeder capacity: %0.0f%%", capacity)
 	event.RenderSSE("feeder", components.FeederWidget(capacity))
 }
