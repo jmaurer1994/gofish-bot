@@ -2,11 +2,15 @@ package main
 
 import (
 	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"strconv"
+	"time"
+
 	"github.com/jmaurer1994/gofish-bot/internal/overlay/views/components"
 	"github.com/jmaurer1994/gofish-bot/internal/scheduler"
 	"github.com/jmaurer1994/gofish-bot/internal/weather"
-	"log"
-	"time"
 )
 
 func registerSchedulerTasks(sch *scheduler.Scheduler) {
@@ -149,4 +153,35 @@ func ResetCamera(s *scheduler.Scheduler) {
 	}
 	gc.ToggleSourceVisibility("Main", "PondCamera")
 	log.Printf("Toggled camera source\n")
+}
+
+func UpdateFeederCapacity(s *scheduler.Scheduler) {
+	resp, err := http.Get("https://sensor.gofish.cam/scale/read?samples=10")
+
+	if err != nil {
+		log.Printf("Error updating feeder capacity: %v\n", err)
+		return
+	}
+
+	defer resp.Body.Close()
+
+	body, readErr := io.ReadAll(resp.Body)
+
+	if readErr != nil {
+		log.Printf("Error updating feeder capacity2: %v\n", err)
+		return
+	}
+
+	str := string(body)
+
+	f, convErr := strconv.ParseFloat(str, 64)
+
+	if convErr != nil {
+		log.Printf("Error updating feeder capacity due to conversion error: %v\n", convErr)
+		return
+	}
+
+	capacity := f / 1500.00
+
+	event.RenderSSE("feeder", components.FeederWidget(capacity))
 }

@@ -1,0 +1,13 @@
+package components
+
+import "fmt"
+
+css backgroundfill(percent float64) {
+	background: { templ.SafeCSSProperty(fmt.Sprintf("linear-gradient(1turn, #a85036 0 %0.0f%%, #ffffff88 %0.0f%% 100%%)", percent, percent)) };
+}
+
+templ FeederWidget(remaining_capacity float64) {
+	<div class="feeder" sse-swap="feeder" hx-target="outerHTML">
+		<img class={ "feeder-icon", backgroundfill(remaining_capacity) } src="/assets/feeder.png"/>
+	</div>
+}
