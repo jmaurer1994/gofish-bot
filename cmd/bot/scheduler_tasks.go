@@ -188,8 +188,8 @@ func UpdateFeederCapacity(s *scheduler.Scheduler) {
 		log.Printf("Error updating feeder capacity due to conversion error: %v\n", convErr)
 		return
 	}
-
+	log.Printf("Scale value: %f\n", f)
 	capacity := f / 1500.00
-	log.Printf("Feeder capacity: %0.0f%%", capacity)
+	log.Printf("Feeder capacity: %000.0f%%\n", capacity)
 	event.RenderSSE("feeder", components.FeederWidget(capacity))
 }
