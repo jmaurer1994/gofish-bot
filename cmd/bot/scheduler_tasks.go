@@ -31,6 +31,14 @@ func registerSchedulerTasks(sch *scheduler.Scheduler) {
 	})
 
 	sch.RegisterTask(scheduler.Task{
+		T:          "channel:overlay:feeder",
+		Enabled:    true,
+		Interval:   time.Duration(15) * time.Minute,
+		F:          UpdateFeederCapacity,
+		RunAtStart: true,
+	})
+
+	sch.RegisterTask(scheduler.Task{
 		T:          "channel:reader:check",
 		Enabled:    true,
 		Interval:   time.Duration(1) * time.Hour,
