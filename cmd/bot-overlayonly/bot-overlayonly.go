@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/jmaurer1994/gofish-bot/internal/overlay"
-	"github.com/jmaurer1994/gofish-bot/internal/overlay/views/components"
+	"github.com/jmaurer1994/gofish-bot/internal/app"
+	"github.com/jmaurer1994/gofish-bot/internal/app/views/components"
 	"log"
 	"os"
 	"os/signal"
@@ -11,11 +11,11 @@ import (
 )
 
 var (
-	event *overlay.Event
+	event *app.Event
 )
 
 func main() {
-	event = overlay.StartOverlay()
+	event = app.StartOverlay()
 	// Create a channel to receive os.Signal values.operator
 	sigs := make(chan os.Signal, 1)
 	// Notify the channel if a SIGINT or SIGTERM is received.

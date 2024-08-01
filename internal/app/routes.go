@@ -1,9 +1,9 @@
-package overlay
+package app
 
 import (
 	"context"
 	"github.com/gin-gonic/gin"
-	"github.com/jmaurer1994/gofish-bot/internal/overlay/views"
+	"github.com/jmaurer1994/gofish-bot/internal/app/views"
 	"io"
 	"net/http"
 )

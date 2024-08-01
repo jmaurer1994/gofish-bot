@@ -1,4 +1,4 @@
-package overlay
+package app
 
 import (
 	"bytes"
@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const appTimeout = time.Second * 10
+const appTimeout = time.Second * 30
 
 type Config struct {
 	Router *gin.Engine

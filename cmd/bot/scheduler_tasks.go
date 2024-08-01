@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/jmaurer1994/gofish-bot/internal/overlay/views/components"
+	"github.com/jmaurer1994/gofish-bot/internal/app/views/components"
 	"github.com/jmaurer1994/gofish-bot/internal/scheduler"
 	"github.com/jmaurer1994/gofish-bot/internal/weather"
 )

@@ -9,11 +9,11 @@ import (
 
 	"github.com/joho/godotenv"
 
+	"github.com/jmaurer1994/gofish-bot/internal/app"
 	"github.com/jmaurer1994/gofish-bot/internal/camera"
 	"github.com/jmaurer1994/gofish-bot/internal/commandprocessor"
 	"github.com/jmaurer1994/gofish-bot/internal/database"
 	"github.com/jmaurer1994/gofish-bot/internal/obs"
-	"github.com/jmaurer1994/gofish-bot/internal/overlay"
 	"github.com/jmaurer1994/gofish-bot/internal/scheduler"
 	"github.com/jmaurer1994/gofish-bot/internal/twitch"
 	"github.com/jmaurer1994/gofish-bot/internal/weather"
@@ -28,7 +28,7 @@ var (
 	c       camera.IpCamera
 	sch     *scheduler.Scheduler
 	cmdproc commandprocessor.CommandProcessor
-	event   *overlay.Event
+	event   *app.Event
 )
 
 func main() {
@@ -85,7 +85,7 @@ func obsSetup() {
 		log.Printf("Error creating goobs client\n")
 	}
 
-	event = overlay.StartOverlay()
+	event = app.StartOverlay()
 }
 
 func ttvSetup() {

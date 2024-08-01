@@ -12,7 +12,7 @@ import "fmt"
 
 func backgroundfill(percent float64) templ.CSSClass {
 	templ_7745c5c3_CSSBuilder := templruntime.GetBuilder()
-	templ_7745c5c3_CSSBuilder.WriteString(string(templ.SanitizeCSS(`background`, templ.SafeCSSProperty(fmt.Sprintf("linear-gradient(1turn, #a85036 0 %0.0f%%, #ffffff88 %0.0f%% 100%%)", percent, percent)))))
+	templ_7745c5c3_CSSBuilder.WriteString(string(templ.SanitizeCSS(`background`, templ.SafeCSSProperty(fmt.Sprintf("linear-gradient(1turn, #a85036 0 %.0f%%, #ffffff88 %.0f%% 100%%)", percent, percent)))))
 	templ_7745c5c3_CSSID := templ.CSSID(`backgroundfill`, templ_7745c5c3_CSSBuilder.String())
 	return templ.ComponentCSSClass{
 		ID:    templ_7745c5c3_CSSID,
@@ -38,7 +38,7 @@ func FeederWidget(remaining_capacity float64) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"feeder\" sse-swap=\"feeder\" hx-target=\"outerHTML\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"feeder\" sse-swap=\"feeder\" hx-swap=\"outerHTML\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -54,7 +54,7 @@ func FeederWidget(remaining_capacity float64) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var2).String())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/overlay/views/components/feederwidget.templ`, Line: 1, Col: 0}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/app/views/components/feederwidget.templ`, Line: 1, Col: 0}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
