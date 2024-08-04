@@ -63,8 +63,8 @@ func (app *Config) OwmUpdate() {
 	app.Data.Weather = w
 	app.Data.Countdown = NewCountdown(w)
 
-	app.Event.RenderSSE("weather", components.WeatherWidget(w))
-	app.Event.RenderSSE("countdown", components.CountdownWidget(app.Data.Countdown.Hours(), app.Data.Countdown.Minutes(), app.Data.Countdown.Target))
+	app.Overlay.Render("weather", components.WeatherWidget(w))
+	app.Overlay.Render("countdown", components.CountdownWidget(app.Data.Countdown.Hours(), app.Data.Countdown.Minutes(), app.Data.Countdown.Target))
 }
 
 func (app *Config) SavePondCameraScreenshot() {
@@ -126,5 +126,5 @@ func (app *Config) UpdateFeederWeight() {
 
 	app.Data.FeederWeight = f
 
-	app.Event.RenderSSE("feeder", components.FeederWidget(f))
+	app.Overlay.Render("feeder", components.FeederWidget(f))
 }

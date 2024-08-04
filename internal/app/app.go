@@ -23,7 +23,7 @@ const appTimeout = time.Second * 30
 
 type Config struct {
 	Router    *gin.Engine
-	Event     *Event
+	Overlay   *SSEvent
 	TwitchApi *twitch.TwitchApiClient
 	TwitchIrc *twitch.TwitchIrcClient
 	CmdProc   *chat.CommandProcessor
@@ -58,9 +58,9 @@ func (app *Config) Start() {
 
 func NewApp() *Config {
 	router := gin.Default()
-	stream := NewServer()
+	sse := NewServer()
 
-	app := &Config{Router: router, Event: stream}
+	app := &Config{Router: router, Overlay: sse}
 
 	return app
 }
