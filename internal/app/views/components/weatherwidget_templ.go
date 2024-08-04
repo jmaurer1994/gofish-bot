@@ -8,9 +8,12 @@ package components
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/jmaurer1994/gofish-bot/internal/weather"
+)
 
-func WeatherWidget(conditions []string, f string, c string, humidity string, phaseText string, phase string) templ.Component {
+func WeatherWidget(w weather.OneCallResponse) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -28,18 +31,18 @@ func WeatherWidget(conditions []string, f string, c string, humidity string, pha
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"weather\" sse-swap=\"weather\" hx-swap=\"outerHTML\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"weather\" hx-get=\"/weather\" hx-trigger=\"sse:weather\" hx-swap=\"outerHTML\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		for i, condition := range conditions {
+		for i, c := range w.Current.Weather {
 			if i == 0 {
-				templ_7745c5c3_Err = ActiveWeatherIcon(condition).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = ActiveWeatherIcon(c.Icon).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = HiddenWeatherIcon(condition).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = HiddenWeatherIcon(c.Icon).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -50,9 +53,9 @@ func WeatherWidget(conditions []string, f string, c string, humidity string, pha
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(f)
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.0f", w.Current.Temp))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/app/views/components/weatherwidget.templ`, Line: 15, Col: 12}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/app/views/components/weatherwidget.templ`, Line: 19, Col: 46}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -65,7 +68,7 @@ func WeatherWidget(conditions []string, f string, c string, humidity string, pha
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/assets/weather/bas/thermometer-fahrenheit.svg"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/app/views/components/weatherwidget.templ`, Line: 16, Col: 75}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/app/views/components/weatherwidget.templ`, Line: 20, Col: 75}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -76,9 +79,9 @@ func WeatherWidget(conditions []string, f string, c string, humidity string, pha
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(c)
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.1f", weather.FToC(w.Current.Temp)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/app/views/components/weatherwidget.templ`, Line: 17, Col: 12}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/app/views/components/weatherwidget.templ`, Line: 21, Col: 60}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -91,7 +94,7 @@ func WeatherWidget(conditions []string, f string, c string, humidity string, pha
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/assets/weather/bas/thermometer-celsius.svg"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/app/views/components/weatherwidget.templ`, Line: 18, Col: 72}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/app/views/components/weatherwidget.templ`, Line: 22, Col: 72}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -102,9 +105,9 @@ func WeatherWidget(conditions []string, f string, c string, humidity string, pha
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 string
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(humidity)
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", w.Current.Humidity))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/app/views/components/weatherwidget.templ`, Line: 21, Col: 19}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/app/views/components/weatherwidget.templ`, Line: 25, Col: 48}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -117,7 +120,7 @@ func WeatherWidget(conditions []string, f string, c string, humidity string, pha
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/assets/weather/bas/humidity.svg"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/app/views/components/weatherwidget.templ`, Line: 22, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/app/views/components/weatherwidget.templ`, Line: 26, Col: 61}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -128,9 +131,9 @@ func WeatherWidget(conditions []string, f string, c string, humidity string, pha
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var8 string
-		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(phaseText)
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(LunarPhaseValueToString(w.Daily[0].MoonPhase))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/app/views/components/weatherwidget.templ`, Line: 25, Col: 20}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/app/views/components/weatherwidget.templ`, Line: 29, Col: 56}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -141,9 +144,9 @@ func WeatherWidget(conditions []string, f string, c string, humidity string, pha
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var9 string
-		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/assets/weather/bas/%s.svg", phase))
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/assets/weather/bas/%s.svg", LunarPhaseValueToIcon(w.Daily[0].MoonPhase)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/app/views/components/weatherwidget.templ`, Line: 26, Col: 62}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/app/views/components/weatherwidget.templ`, Line: 30, Col: 100}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -182,7 +185,7 @@ func ActiveWeatherIcon(condition string) templ.Component {
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/assets/weather/bas/openweathermap/%s.svg", condition))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/app/views/components/weatherwidget.templ`, Line: 32, Col: 112}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/app/views/components/weatherwidget.templ`, Line: 36, Col: 112}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -221,7 +224,7 @@ func HiddenWeatherIcon(condition string) templ.Component {
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/assets/weather/bas/openweathermap/%s.svg", condition))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/app/views/components/weatherwidget.templ`, Line: 36, Col: 112}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/app/views/components/weatherwidget.templ`, Line: 40, Col: 112}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -233,4 +236,52 @@ func HiddenWeatherIcon(condition string) templ.Component {
 		}
 		return templ_7745c5c3_Err
 	})
+}
+
+func LunarPhaseValueToIcon(lpv float64) string {
+	var phaseIcon string
+	switch {
+	case lpv == 0:
+		phaseIcon = "moon-new"
+	case lpv < 0.25:
+		phaseIcon = "moon-waxing-crescent"
+	case lpv == 0.25:
+		phaseIcon = "moon-first-quarter"
+	case lpv < 0.5:
+		phaseIcon = "moon-waxing-gibbous"
+	case lpv == 0.5:
+		phaseIcon = "moon-full"
+	case lpv < 0.75:
+		phaseIcon = "moon-waning-gibbous"
+	case lpv == 0.75:
+		phaseIcon = "moon-last-quarter"
+	case lpv < 1:
+		phaseIcon = "moon-waning-crescent"
+	}
+
+	return phaseIcon
+}
+
+func LunarPhaseValueToString(lpv float64) string {
+	var phaseText string
+	switch {
+	case lpv == 0:
+		phaseText = "New Moon"
+	case lpv < 0.25:
+		phaseText = "Waxing Crescent"
+	case lpv == 0.25:
+		phaseText = "First Quarter"
+	case lpv < 0.5:
+		phaseText = "Waxing Gibbous"
+	case lpv == 0.5:
+		phaseText = "Full Moon"
+	case lpv < 0.75:
+		phaseText = "Waning Gibbous"
+	case lpv == 0.75:
+		phaseText = "Last Quarter"
+	case lpv < 1:
+		phaseText = "Waning Crescent"
+	}
+
+	return phaseText
 }

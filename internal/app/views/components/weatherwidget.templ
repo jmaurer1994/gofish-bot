@@ -1,29 +1,33 @@
 package components
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/jmaurer1994/gofish-bot/internal/weather"
+)
 
-templ WeatherWidget(conditions []string, f string, c string, humidity string, phaseText string, phase string) {
-	<div class="weather" sse-swap="weather" hx-swap="outerHTML">
-		for i, condition := range conditions {
+templ WeatherWidget(w weather.OneCallResponse) {
+	//templ WeatherWidget(conditions []string, f string, c string, humidity string, phaseText string, phase string) {
+	<div class="weather" hx-get="/weather" hx-trigger="sse:weather" hx-swap="outerHTML">
+		for i, c := range w.Current.Weather {
 			if i == 0 {
-				@ActiveWeatherIcon(condition)
+				@ActiveWeatherIcon(c.Icon)
 			} else {
-				@HiddenWeatherIcon(condition)
+				@HiddenWeatherIcon(c.Icon)
 			}
 		}
 		<div class="weather-info temperature fade active">
-			<span>{ f }</span>
+			<span>{ fmt.Sprintf("%.0f", w.Current.Temp) }</span>
 			<img src={ fmt.Sprintf("/assets/weather/bas/thermometer-fahrenheit.svg") }/>
-			<span>{ c }</span>
+			<span>{ fmt.Sprintf("%.1f", weather.FToC(w.Current.Temp)) }</span>
 			<img src={ fmt.Sprintf("/assets/weather/bas/thermometer-celsius.svg") }/>
 		</div>
 		<div class="weather-info humidity fade hidden">
-			<span>{ humidity }</span>
+			<span>{ fmt.Sprintf("%d", w.Current.Humidity) }</span>
 			<img src={ fmt.Sprintf("/assets/weather/bas/humidity.svg") }/>
 		</div>
 		<div class="weather-info moon fade hidden">
-			<span>{ phaseText }</span>
-			<img src={ fmt.Sprintf("/assets/weather/bas/%s.svg", phase) }/>
+			<span>{ LunarPhaseValueToString(w.Daily[0].MoonPhase) }</span>
+			<img src={ fmt.Sprintf("/assets/weather/bas/%s.svg", LunarPhaseValueToIcon(w.Daily[0].MoonPhase)) }/>
 		</div>
 	</div>
 }
@@ -34,4 +38,52 @@ templ ActiveWeatherIcon(condition string) {
 
 templ HiddenWeatherIcon(condition string) {
 	<img class="weather-icon fade hidden" src={ fmt.Sprintf("/assets/weather/bas/openweathermap/%s.svg", condition) }/>
+}
+
+func LunarPhaseValueToIcon(lpv float64) string {
+	var phaseIcon string
+	switch {
+	case lpv == 0:
+		phaseIcon = "moon-new"
+	case lpv < 0.25:
+		phaseIcon = "moon-waxing-crescent"
+	case lpv == 0.25:
+		phaseIcon = "moon-first-quarter"
+	case lpv < 0.5:
+		phaseIcon = "moon-waxing-gibbous"
+	case lpv == 0.5:
+		phaseIcon = "moon-full"
+	case lpv < 0.75:
+		phaseIcon = "moon-waning-gibbous"
+	case lpv == 0.75:
+		phaseIcon = "moon-last-quarter"
+	case lpv < 1:
+		phaseIcon = "moon-waning-crescent"
+	}
+
+	return phaseIcon
+}
+
+func LunarPhaseValueToString(lpv float64) string {
+	var phaseText string
+	switch {
+	case lpv == 0:
+		phaseText = "New Moon"
+	case lpv < 0.25:
+		phaseText = "Waxing Crescent"
+	case lpv == 0.25:
+		phaseText = "First Quarter"
+	case lpv < 0.5:
+		phaseText = "Waxing Gibbous"
+	case lpv == 0.5:
+		phaseText = "Full Moon"
+	case lpv < 0.75:
+		phaseText = "Waning Gibbous"
+	case lpv == 0.75:
+		phaseText = "Last Quarter"
+	case lpv < 1:
+		phaseText = "Waning Crescent"
+	}
+
+	return phaseText
 }

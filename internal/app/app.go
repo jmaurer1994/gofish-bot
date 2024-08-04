@@ -32,17 +32,23 @@ type Config struct {
 	Camera    *camera.IpCamera
 	Scheduler *scheduler.Scheduler
 	OwmApi    *weather.OwmClient
+
+	Data struct {
+		Countdown    Countdown
+		Weather      weather.OneCallResponse
+		FeederWeight float64
+	}
 }
 
 func (app *Config) Start() {
-	go app.Router.Run(":8080")
-
 	if err := app.TwitchIrc.InitializeConnection(); err != nil {
 		log.Printf("Twitch IRC error: %v", err)
 	}
-
 	log.Println("Starting task scheduler")
 	app.Scheduler.Start()
+
+	go app.Router.Run(":8080")
+
 	// Create a channel to receive os.Signal values.operator
 	sigs := make(chan os.Signal, 1)
 

@@ -1,7 +1,6 @@
 package app
 
 import (
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -10,7 +9,6 @@ import (
 
 	"github.com/jmaurer1994/gofish-bot/internal/app/views/components"
 	"github.com/jmaurer1994/gofish-bot/internal/scheduler"
-	"github.com/jmaurer1994/gofish-bot/internal/weather"
 )
 
 func (app *Config) registerSchedulerTasks() {
@@ -23,18 +21,18 @@ func (app *Config) registerSchedulerTasks() {
 	})
 
 	app.Scheduler.RegisterTask(scheduler.Task{
-		T:          "channel:overlay:update",
+		T:          "data:weather:udpate",
 		Enabled:    true,
 		Interval:   time.Duration(5) * time.Minute,
-		F:          app.UpdateOverlay,
+		F:          app.OwmUpdate,
 		RunAtStart: true,
 	})
 
 	app.Scheduler.RegisterTask(scheduler.Task{
-		T:          "channel:overlay:feeder",
+		T:          "data:weight:update",
 		Enabled:    true,
 		Interval:   time.Duration(15) * time.Minute,
-		F:          app.UpdateFeederCapacity,
+		F:          app.UpdateFeederWeight,
 		RunAtStart: true,
 	})
 
@@ -55,81 +53,18 @@ func (app *Config) registerSchedulerTasks() {
 	})
 }
 
-func (app *Config) UpdateOverlay() {
+func (app *Config) OwmUpdate() {
 	w, err := app.OwmApi.GetCurrentCondiitons()
 
 	if err != nil {
 		log.Printf("Error retrieving current conditions: %v\n", err)
 		return
 	}
+	app.Data.Weather = w
+	app.Data.Countdown = NewCountdown(w)
 
-	currentTime := int(time.Now().UnixMilli() / 1000)
-
-	var (
-		nextSunEvent          string
-		nextSunEventCountdown SunEventCountdown
-		phaseText             string
-		phaseIcon             string
-	)
-
-	riseTime := w.Current.Sunrise - currentTime
-	setTime := w.Current.Sunset - currentTime
-	if riseTime > 0 {
-		//currently >12am and counting down until sunrise
-		nextSunEvent = "sunrise"
-		nextSunEventCountdown = getTimeUntil(currentTime, w.Current.Sunrise)
-
-		if nextSunEventCountdown.hours < 1 && nextSunEventCountdown.minutes <= 10 {
-			log.Println("Generating camera light off event")
-			app.Scheduler.GenerateEvent("camera:light:check", "off")
-		}
-	} else if setTime > 0 {
-		nextSunEvent = "moonrise"
-		nextSunEventCountdown = getTimeUntil(currentTime, w.Current.Sunset)
-
-		if nextSunEventCountdown.hours < 1 && nextSunEventCountdown.minutes == 0 {
-			log.Println("Generating camera light on event")
-			app.Scheduler.GenerateEvent("camera:light:check", "on")
-		}
-
-	} else {
-		//get tomorrow's sunrise
-		nextSunEvent = "sunrise"
-		nextSunEventCountdown = getTimeUntil(currentTime, w.Daily[1].Sunrise)
-	}
-
-	phaseText, phaseIcon, err = weather.LunarPhaseValueToString(w.Daily[0].MoonPhase)
-	if err != nil {
-		log.Printf("Could not get get lunar phase icon: %v\n", err)
-		return
-	}
-
-	conditions := make([]string, 0)
-	for _, condition := range w.Current.Weather {
-		conditions = append(conditions, condition.Icon)
-	}
-
-	log.Println("Updating weather")
-
-	app.Event.RenderSSE("weather", components.WeatherWidget(conditions, fmt.Sprintf("%.0f", w.Current.Temp), fmt.Sprintf("%.1f", weather.FToC(w.Current.Temp)), fmt.Sprintf("%d", w.Current.Humidity), phaseText, phaseIcon))
-
-	log.Printf("Time: %02d %02d", nextSunEventCountdown.hours, nextSunEventCountdown.minutes)
-
-	app.Event.RenderSSE("time", components.TimeWidget(fmt.Sprintf("%02d", nextSunEventCountdown.hours), fmt.Sprintf("%02d", nextSunEventCountdown.minutes), nextSunEvent))
-}
-
-type SunEventCountdown struct {
-	hours   int
-	minutes int
-}
-
-func getTimeUntil(start int, target int) SunEventCountdown {
-	minutes := ((target - start) % 3600) / 60
-	approxMinutes := minutes - (minutes % 5)
-	return SunEventCountdown{
-		hours:   (target - start) / 3600,
-		minutes: approxMinutes,
-	}
+	app.Event.RenderSSE("weather", components.WeatherWidget(w))
+	app.Event.RenderSSE("countdown", components.CountdownWidget(app.Data.Countdown.Hours(), app.Data.Countdown.Minutes(), app.Data.Countdown.Target))
 }
 
 func (app *Config) SavePondCameraScreenshot() {
@@ -163,7 +98,7 @@ func (app *Config) ResetCamera() {
 	log.Printf("Toggled camera source\n")
 }
 
-func (app *Config) UpdateFeederCapacity() {
+func (app *Config) UpdateFeederWeight() {
 	resp, err := http.Get("https://sensor.gofish.cam/scale/read?samples=10")
 
 	if err != nil {
@@ -188,8 +123,8 @@ func (app *Config) UpdateFeederCapacity() {
 		log.Printf("Error updating feeder capacity due to conversion error: %v\n", convErr)
 		return
 	}
-	log.Printf("Scale value: %f\n", f)
-	capacity := (f / 1500.00) * 100
-	log.Printf("Feeder capacity: %f %.0f%%\n", capacity, capacity)
-	app.Event.RenderSSE("feeder", components.FeederWidget(capacity))
+
+	app.Data.FeederWeight = f
+
+	app.Event.RenderSSE("feeder", components.FeederWidget(f))
 }

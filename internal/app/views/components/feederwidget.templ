@@ -6,8 +6,8 @@ css backgroundfill(percent float64) {
 	background: { templ.SafeCSSProperty(fmt.Sprintf("linear-gradient(1turn, #a85036 0 %.0f%%, #ffffff88 %.0f%% 100%%)", percent, percent)) };
 }
 
-templ FeederWidget(remaining_capacity float64) {
-	<div class="feeder" sse-swap="feeder" hx-swap="outerHTML">
-		<img class={ "feeder-icon", backgroundfill(remaining_capacity) } src="/assets/feeder.png"/>
+templ FeederWidget(current_weight float64) {
+	<div class="feeder" hx-get="/feeder" hx-trigger="sse:feeder" hx-swap="outerHTML">
+		<img class={ "feeder-icon", backgroundfill(current_weight / 1500.0 * 100) } src="/assets/feeder.png"/>
 	</div>
 }

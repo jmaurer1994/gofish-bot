@@ -20,7 +20,7 @@ func backgroundfill(percent float64) templ.CSSClass {
 	}
 }
 
-func FeederWidget(remaining_capacity float64) templ.Component {
+func FeederWidget(current_weight float64) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -38,11 +38,11 @@ func FeederWidget(remaining_capacity float64) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"feeder\" sse-swap=\"feeder\" hx-swap=\"outerHTML\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"feeder\" hx-get=\"/feeder\" hx-trigger=\"sse:feeder\" hx-swap=\"outerHTML\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var2 = []any{"feeder-icon", backgroundfill(remaining_capacity)}
+		var templ_7745c5c3_Var2 = []any{"feeder-icon", backgroundfill(current_weight / 1500.0 * 100)}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

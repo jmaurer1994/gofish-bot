@@ -8,7 +8,10 @@ package views
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/jmaurer1994/gofish-bot/internal/app/views/components"
+import (
+	"github.com/jmaurer1994/gofish-bot/internal/app/views/components"
+	"github.com/jmaurer1994/gofish-bot/internal/weather"
+)
 
 func Index() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -40,15 +43,15 @@ func Index() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = components.WeatherWidget([]string{"01d"}, "75", "23.5", "18", "Waxing Crescent", "moon-new").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = components.WeatherWidget(weather.OneCallResponse{}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = components.FeederWidget(55.0).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = components.FeederWidget(1000).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = components.TimeWidget("10", "20", "moonrise").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = components.CountdownWidget(00, 00, "moonrise").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

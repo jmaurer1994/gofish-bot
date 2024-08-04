@@ -1,6 +1,9 @@
 package views
 
-import "github.com/jmaurer1994/gofish-bot/internal/app/views/components"
+import (
+	"github.com/jmaurer1994/gofish-bot/internal/app/views/components"
+	"github.com/jmaurer1994/gofish-bot/internal/weather"
+)
 
 templ Index() {
 	<!DOCTYPE html>
@@ -10,9 +13,9 @@ templ Index() {
 			<div class="container" hx-ext="sse" sse-connect="/stream">
 				<div class="overlay"><span></span></div>
 				<div class="icon-bar">
-					@components.WeatherWidget([]string{"01d"}, "75", "23.5", "18", "Waxing Crescent", "moon-new")
-					@components.FeederWidget(55.0)
-					@components.TimeWidget("10", "20", "moonrise")
+					@components.WeatherWidget(weather.OneCallResponse{})
+					@components.FeederWidget(1000)
+					@components.CountdownWidget(00, 00, "moonrise")
 				</div>
 			</div>
 		</body>

@@ -1,0 +1,18 @@
+package components
+
+import (
+	"fmt"
+	"strconv"
+)
+
+templ CountdownWidget(hours int, minutes int, icon string) {
+	<div class="countdown" hx-get="/countdown" hx-trigger="sse:countdown" hx-swap="outerHTML">
+		<div class="hours">
+			{ strconv.Itoa(hours) }
+		</div>
+		<div class="minutes">
+			{ strconv.Itoa(minutes) }
+		</div>
+		<img src={ fmt.Sprintf("/assets/weather/bas/%s.svg", icon) }/>
+	</div>
+}
