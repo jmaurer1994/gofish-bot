@@ -8,7 +8,7 @@ import (
 
 func (app *Config) registerIrcHandlers() {
 	app.TwitchIrc.RegisterHandlers(func(ircReader *irc.Client) {
-		ircReader.OnShardReconnect(onShardReconnect)
+		ircReader.OnShardReconnect(app.onShardReconnect)
 		ircReader.OnShardServerNotice(app.onShardServerNotice)
 		ircReader.OnShardLatencyUpdate(app.onShardLatencyUpdate)
 		ircReader.OnShardMessage(app.onChannelMessage)
@@ -16,22 +16,22 @@ func (app *Config) registerIrcHandlers() {
 	})
 }
 
-func onShardReconnect(shardID int) {
+func (app *Config) onShardReconnect(shardID int) {
 	log.Printf("Shard #%d reconnected\n", shardID)
-	/*
-		go func() {
-			app.TwitchIrc.CloseConnection()
-			log.Printf("Disconnected\n")
-			time.Sleep(3 * time.Second)
 
-			if err := app.TwitchIrc.InitializeConnection(); err != nil {
-				log.Printf("Error reconnecting to IRC: %v\n", err)
-			}
+	go func() {
+		app.TwitchIrc.CloseConnection()
+		log.Printf("Disconnected\n")
+		time.Sleep(3 * time.Second)
 
-			app.registerIrcHandlers()
-			log.Printf("Reconnected\n")
-		}()
-	*/
+		if err := app.TwitchIrc.InitializeConnection(); err != nil {
+			log.Printf("Error reconnecting to IRC: %v\n", err)
+		}
+
+		app.registerIrcHandlers()
+		log.Printf("Reconnected\n")
+	}()
+
 }
 
 func (app *Config) onShardServerNotice(shardID int, sn irc.ServerNotice) {

@@ -41,9 +41,6 @@ type Config struct {
 }
 
 func (app *Config) Start() {
-	if err := app.TwitchIrc.InitializeConnection(); err != nil {
-		log.Printf("Twitch IRC error: %v", err)
-	}
 	log.Println("Starting task scheduler")
 	app.Scheduler.Start()
 
@@ -137,6 +134,10 @@ func (app *Config) twitchSetup() {
 	}
 
 	app.CmdProc = chat.NewCommandProcessor("!")
+
+	if err := app.TwitchIrc.InitializeConnection(); err != nil {
+		log.Printf("Twitch IRC error: %v", err)
+	}
 
 	app.registerIrcHandlers()
 	app.registerChatCommands()
