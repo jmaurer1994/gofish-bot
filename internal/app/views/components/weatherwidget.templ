@@ -26,8 +26,10 @@ templ WeatherWidget(w weather.OneCallResponse) {
 			<img src={ fmt.Sprintf("/assets/weather/bas/humidity.svg") }/>
 		</div>
 		<div class="weather-info moon fade hidden">
-			<span>{ LunarPhaseValueToString(w.Daily[0].MoonPhase) }</span>
-			<img src={ fmt.Sprintf("/assets/weather/bas/%s.svg", LunarPhaseValueToIcon(w.Daily[0].MoonPhase)) }/>
+			if len(w.Daily) > 0 {
+				<span>{ LunarPhaseValueToString(w.Daily[0].MoonPhase) }</span>
+				<img src={ fmt.Sprintf("/assets/weather/bas/%s.svg", LunarPhaseValueToIcon(w.Daily[0].MoonPhase)) }/>
+			}
 		</div>
 	</div>
 }
