@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"log"
 	"os"
 	"os/signal"
@@ -46,6 +47,7 @@ func (app *Config) Start() {
 
 	go app.Router.Run(":8080")
 	go app.Overlay.Listen()
+	go app.Db.Listen(context.Background())
 	// Create a channel to receive os.Signal values.operator
 	sigs := make(chan os.Signal, 1)
 
@@ -107,7 +109,6 @@ func (app *Config) owmSetup() {
 	}
 }
 func (app *Config) twitchSetup() {
-
 	app.TwitchApi = &twitch.TwitchApiClient{
 		ClientId:      os.Getenv("TTV_CLIENT_ID"),
 		BroadcasterId: os.Getenv("TTV_BROADCASTER_ID"),
@@ -142,7 +143,6 @@ func (app *Config) twitchSetup() {
 }
 
 func (app *Config) cameraSetup() {
-
 	app.Camera = &camera.IpCamera{
 		Address:  os.Getenv("IPCAMERA_ADDRESS"),
 		Username: os.Getenv("IPCAMERA_USERNAME"),

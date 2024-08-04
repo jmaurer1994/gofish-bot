@@ -21,7 +21,7 @@ func (app *Config) registerSchedulerTasks() {
 	})
 
 	app.Scheduler.RegisterTask(scheduler.Task{
-		T:          "data:weather:udpate",
+		T:          "data:weather:update",
 		Enabled:    true,
 		Interval:   time.Duration(5) * time.Minute,
 		F:          app.OwmUpdate,
@@ -62,6 +62,13 @@ func (app *Config) OwmUpdate() {
 	}
 	app.Data.Weather = w
 	app.Data.Countdown = NewCountdown(w)
+
+	switch {
+	case app.Data.Countdown.Target == "sunrise":
+		app.Scheduler.GenerateEvent("camera:light:check", "on")
+	case app.Data.Countdown.Target == "moonrise":
+		app.Scheduler.GenerateEvent("camera:light:check", "off")
+	}
 
 	app.Overlay.Render("weather", components.WeatherWidget(w))
 	app.Overlay.Render("countdown", components.CountdownWidget(app.Data.Countdown.Hours(), app.Data.Countdown.Minutes(), app.Data.Countdown.Target))
