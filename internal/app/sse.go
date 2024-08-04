@@ -13,7 +13,7 @@ type Message struct {
 	Channel string
 	Data    string
 }
-type Event struct {
+type SSEvent struct {
 	// Events are pushed to this channel by the main events-gathering routine
 	Message chan Message
 
@@ -30,7 +30,7 @@ type Event struct {
 // New event messages are broadcast to all registered client connection channels
 type ClientChan chan Message
 
-func (event *Event) RenderSSE(channel string, template templ.Component) error {
+func (event *SSEvent) Render(channel string, template templ.Component) error {
 	ctx, cancel := context.WithTimeout(context.Background(), appTimeout)
 	defer cancel()
 
@@ -47,8 +47,8 @@ func render(ctx *gin.Context, status int, template templ.Component) error {
 	return template.Render(ctx.Request.Context(), ctx.Writer)
 }
 
-func NewServer() (event *Event) {
-	event = &Event{
+func NewServer() (event *SSEvent) {
+	event = &SSEvent{
 		Message:       make(chan Message),
 		NewClients:    make(chan chan Message),
 		ClosedClients: make(chan chan Message),
@@ -60,40 +60,40 @@ func NewServer() (event *Event) {
 
 // It Listens all incoming requests from clients.
 // Handles addition and removal of clients and broadcast messages to clients.
-func (stream *Event) Listen() {
+func (s *SSEvent) Listen() {
 	for {
 		select {
 		// Add new available client
-		case client := <-stream.NewClients:
-			stream.TotalClients[client] = true
-			log.Printf("Client added. %d registered clients", len(stream.TotalClients))
+		case client := <-s.NewClients:
+			s.TotalClients[client] = true
+			log.Printf("Client added. %d registered clients", len(s.TotalClients))
 
 		// Remove closed client
-		case client := <-stream.ClosedClients:
-			delete(stream.TotalClients, client)
+		case client := <-s.ClosedClients:
+			delete(s.TotalClients, client)
 			close(client)
-			log.Printf("Removed client. %d registered clients", len(stream.TotalClients))
+			log.Printf("Removed client. %d registered clients", len(s.TotalClients))
 
 		// Broadcast message to client
-		case eventMsg := <-stream.Message:
-			for clientMessageChan := range stream.TotalClients {
+		case eventMsg := <-s.Message:
+			for clientMessageChan := range s.TotalClients {
 				clientMessageChan <- eventMsg
 			}
 		}
 	}
 }
 
-func (stream *Event) serveHTTP() gin.HandlerFunc {
+func (s *SSEvent) serveHTTP() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Initialize client channel
 		clientChan := make(ClientChan)
 
 		// Send new connection to event server
-		stream.NewClients <- clientChan
+		s.NewClients <- clientChan
 
 		defer func() {
 			// Send closed connection to event server
-			stream.ClosedClients <- clientChan
+			s.ClosedClients <- clientChan
 		}()
 
 		c.Set("clientChan", clientChan)
@@ -104,7 +104,7 @@ func (stream *Event) serveHTTP() gin.HandlerFunc {
 
 func HeadersMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Writer.Header().Set("Content-Type", "text/event-stream")
+		c.Writer.Header().Set("Content-Type", "text/event-s")
 		c.Writer.Header().Set("Cache-Control", "no-cache")
 		c.Writer.Header().Set("Connection", "keep-alive")
 		c.Writer.Header().Set("Transfer-Encoding", "chunked")

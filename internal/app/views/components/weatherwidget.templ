@@ -5,9 +5,11 @@ import (
 	"github.com/jmaurer1994/gofish-bot/internal/weather"
 )
 
+var slidesHandle = templ.NewOnceHandle()
+
 templ WeatherWidget(w weather.OneCallResponse) {
 	//templ WeatherWidget(conditions []string, f string, c string, humidity string, phaseText string, phase string) {
-	<div class="weather" hx-get="/weather" hx-trigger="sse:weather" hx-swap="outerHTML">
+	<div class="weather" sse-swap="weather" hx-swap="outerHTML">
 		for i, c := range w.Current.Weather {
 			if i == 0 {
 				@ActiveWeatherIcon(c.Icon)

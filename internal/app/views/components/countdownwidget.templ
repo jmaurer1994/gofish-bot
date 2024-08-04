@@ -3,7 +3,7 @@ package components
 import "fmt"
 
 templ CountdownWidget(hours int, minutes int, icon string) {
-	<div class="countdown" hx-get="/countdown" hx-trigger="sse:countdown" hx-swap="outerHTML">
+	<div class="countdown" sse-swap="countdown" hx-swap="outerHTML">
 		<div class="hours">
 			{ fmt.Sprintf("%02d", hours) }
 		</div>

@@ -7,7 +7,7 @@ css backgroundfill(percent float64) {
 }
 
 templ FeederWidget(current_weight float64) {
-	<div class="feeder" hx-get="/feeder" hx-trigger="sse:feeder" hx-swap="outerHTML">
+	<div class="feeder" sse-swap="feeder" hx-swap="outerHTML">
 		<img class={ "feeder-icon", backgroundfill(current_weight / 1500.0 * 100) } src="/assets/feeder.png"/>
 	</div>
 }
