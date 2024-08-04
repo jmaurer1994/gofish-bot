@@ -28,7 +28,7 @@ func CountdownWidget(hours int, minutes int, icon string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"countdown\" hx-get=\"/countdown\" hx-trigger=\"sse:countdown\" hx-swap=\"outerHTML\"><div class=\"hours\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"countdown\" sse-swap=\"countdown\" hx-swap=\"outerHTML\"><div class=\"hours\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
