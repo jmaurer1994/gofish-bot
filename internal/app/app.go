@@ -45,7 +45,7 @@ func (app *Config) Start() {
 	app.Scheduler.Start()
 
 	go app.Router.Run(":8080")
-
+	go app.Overlay.Listen()
 	// Create a channel to receive os.Signal values.operator
 	sigs := make(chan os.Signal, 1)
 
