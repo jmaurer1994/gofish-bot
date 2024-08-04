@@ -77,7 +77,7 @@ func (app *Config) Init() {
 	app.owmSetup()
 	app.obsSetup()
 	app.twitchSetup()
-
+	app.dbSetup()
 	app.schedulerSetup()
 
 }
