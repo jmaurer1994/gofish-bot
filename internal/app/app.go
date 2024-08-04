@@ -62,8 +62,6 @@ func NewApp() *Config {
 
 	app := &Config{Router: router, Event: stream}
 
-	app.Init()
-
 	return app
 }
 
