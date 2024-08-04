@@ -8,7 +8,7 @@ import (
 
 func (app *Config) registerIrcHandlers() {
 	app.TwitchIrc.RegisterHandlers(func(ircReader *irc.Client) {
-		ircReader.OnShardReconnect(app.onShardReconnect)
+		ircReader.OnShardReconnect(onShardReconnect)
 		ircReader.OnShardServerNotice(app.onShardServerNotice)
 		ircReader.OnShardLatencyUpdate(app.onShardLatencyUpdate)
 		ircReader.OnShardMessage(app.onChannelMessage)
@@ -16,7 +16,7 @@ func (app *Config) registerIrcHandlers() {
 	})
 }
 
-func (app *Config) onShardReconnect(shardID int) {
+func onShardReconnect(shardID int) {
 	log.Printf("Shard #%d reconnected\n", shardID)
 	/*
 		go func() {
