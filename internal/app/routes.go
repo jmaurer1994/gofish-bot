@@ -11,7 +11,7 @@ import (
 )
 
 func (app *Config) Routes() {
-	app.Router.GET("/stream", HeadersMiddleware(), app.Event.serveHTTP(), app.eventHandler())
+	app.Router.GET("/stream", HeadersMiddleware(), app.Overlay.serveHTTP(), app.eventHandler())
 
 	app.Router.GET("/", app.indexPageHandler())
 	app.Router.GET("/weather", app.weatherComponentHandler())
