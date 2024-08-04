@@ -1,4 +1,4 @@
-package commandprocessor
+package chat
 
 // TODO: not sure if this needs more length/bounds/etc checking
 import (

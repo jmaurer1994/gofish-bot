@@ -1,4 +1,4 @@
-package commandprocessor
+package chat
 
 import (
 	"time"

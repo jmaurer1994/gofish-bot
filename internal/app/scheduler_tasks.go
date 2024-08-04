@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"fmt"
@@ -13,50 +13,50 @@ import (
 	"github.com/jmaurer1994/gofish-bot/internal/weather"
 )
 
-func registerSchedulerTasks(sch *scheduler.Scheduler) {
-	sch.RegisterTask(scheduler.Task{
+func (app *Config) registerSchedulerTasks() {
+	app.Scheduler.RegisterTask(scheduler.Task{
 		T:          "source:screenshot:save",
 		Enabled:    false,
 		Interval:   time.Duration(30) * time.Second,
-		F:          SavePondCameraScreenshot,
+		F:          app.SavePondCameraScreenshot,
 		RunAtStart: true,
 	})
 
-	sch.RegisterTask(scheduler.Task{
+	app.Scheduler.RegisterTask(scheduler.Task{
 		T:          "channel:overlay:update",
 		Enabled:    true,
 		Interval:   time.Duration(5) * time.Minute,
-		F:          UpdateOverlay,
+		F:          app.UpdateOverlay,
 		RunAtStart: true,
 	})
 
-	sch.RegisterTask(scheduler.Task{
+	app.Scheduler.RegisterTask(scheduler.Task{
 		T:          "channel:overlay:feeder",
 		Enabled:    true,
 		Interval:   time.Duration(15) * time.Minute,
-		F:          UpdateFeederCapacity,
+		F:          app.UpdateFeederCapacity,
 		RunAtStart: true,
 	})
 
-	sch.RegisterTask(scheduler.Task{
+	app.Scheduler.RegisterTask(scheduler.Task{
 		T:          "channel:reader:check",
 		Enabled:    true,
 		Interval:   time.Duration(1) * time.Hour,
-		F:          CheckReaderStatus,
+		F:          app.CheckReaderStatus,
 		RunAtStart: false,
 	})
 
-	sch.RegisterTask(scheduler.Task{
+	app.Scheduler.RegisterTask(scheduler.Task{
 		T:          "source:camera:cycle",
 		Enabled:    true,
 		Interval:   time.Duration(4) * time.Hour,
-		F:          ResetCamera,
+		F:          app.ResetCamera,
 		RunAtStart: false,
 	})
 }
 
-func UpdateOverlay(s *scheduler.Scheduler) {
-	w, err := owm.GetCurrentCondiitons()
+func (app *Config) UpdateOverlay() {
+	w, err := app.OwmApi.GetCurrentCondiitons()
 
 	if err != nil {
 		log.Printf("Error retrieving current conditions: %v\n", err)
@@ -81,7 +81,7 @@ func UpdateOverlay(s *scheduler.Scheduler) {
 
 		if nextSunEventCountdown.hours < 1 && nextSunEventCountdown.minutes <= 10 {
 			log.Println("Generating camera light off event")
-			s.GenerateEvent("camera:light:check", "off")
+			app.Scheduler.GenerateEvent("camera:light:check", "off")
 		}
 	} else if setTime > 0 {
 		nextSunEvent = "moonrise"
@@ -89,7 +89,7 @@ func UpdateOverlay(s *scheduler.Scheduler) {
 
 		if nextSunEventCountdown.hours < 1 && nextSunEventCountdown.minutes == 0 {
 			log.Println("Generating camera light on event")
-			s.GenerateEvent("camera:light:check", "on")
+			app.Scheduler.GenerateEvent("camera:light:check", "on")
 		}
 
 	} else {
@@ -111,11 +111,11 @@ func UpdateOverlay(s *scheduler.Scheduler) {
 
 	log.Println("Updating weather")
 
-	event.RenderSSE("weather", components.WeatherWidget(conditions, fmt.Sprintf("%.0f", w.Current.Temp), fmt.Sprintf("%.1f", weather.FToC(w.Current.Temp)), fmt.Sprintf("%d", w.Current.Humidity), phaseText, phaseIcon))
+	app.Event.RenderSSE("weather", components.WeatherWidget(conditions, fmt.Sprintf("%.0f", w.Current.Temp), fmt.Sprintf("%.1f", weather.FToC(w.Current.Temp)), fmt.Sprintf("%d", w.Current.Humidity), phaseText, phaseIcon))
 
 	log.Printf("Time: %02d %02d", nextSunEventCountdown.hours, nextSunEventCountdown.minutes)
 
-	event.RenderSSE("time", components.TimeWidget(fmt.Sprintf("%02d", nextSunEventCountdown.hours), fmt.Sprintf("%02d", nextSunEventCountdown.minutes), nextSunEvent))
+	app.Event.RenderSSE("time", components.TimeWidget(fmt.Sprintf("%02d", nextSunEventCountdown.hours), fmt.Sprintf("%02d", nextSunEventCountdown.minutes), nextSunEvent))
 }
 
 type SunEventCountdown struct {
@@ -132,38 +132,38 @@ func getTimeUntil(start int, target int) SunEventCountdown {
 	}
 }
 
-func SavePondCameraScreenshot(s *scheduler.Scheduler) {
-	if c.CurrentLightLevel() > 0 {
+func (app *Config) SavePondCameraScreenshot() {
+	if app.Camera.CurrentLightLevel() > 0 {
 		return //light on, don't take screenshot
 	}
 
-	err := gc.ScreenshotSource("PondCamera")
+	err := app.Obs.ScreenshotSource("PondCamera")
 
 	if err != nil {
 		log.Printf("Could not save screenshot: %v\n", err)
 	}
 }
 
-func CheckReaderStatus(s *scheduler.Scheduler) {
-	var _, connected = tic.ReaderIsConnected()
+func (app *Config) CheckReaderStatus() {
+	var _, connected = app.TwitchIrc.ReaderIsConnected()
 
 	if !connected {
 		log.Printf("!! Reader is not connected !!\n")
-		if err := tic.ConnectToChannel(); err != nil {
+		if err := app.TwitchIrc.ConnectToChannel(); err != nil {
 			log.Printf("Error while reconnecting to channel!:\n%v\n", err)
 		}
 	}
 }
 
-func ResetCamera(s *scheduler.Scheduler) {
-	if err := tic.Sendf("Resetting camera... We'll be back in a moment!"); err != nil {
+func (app *Config) ResetCamera() {
+	if err := app.TwitchIrc.Sendf("Resetting camera... We'll be back in a moment!"); err != nil {
 		log.Printf("Unable to send camera reset notification: %v\n", err)
 	}
-	gc.ToggleSourceVisibility("Main", "PondCamera")
+	app.Obs.ToggleSourceVisibility("Main", "PondCamera")
 	log.Printf("Toggled camera source\n")
 }
 
-func UpdateFeederCapacity(s *scheduler.Scheduler) {
+func (app *Config) UpdateFeederCapacity() {
 	resp, err := http.Get("https://sensor.gofish.cam/scale/read?samples=10")
 
 	if err != nil {
@@ -191,5 +191,5 @@ func UpdateFeederCapacity(s *scheduler.Scheduler) {
 	log.Printf("Scale value: %f\n", f)
 	capacity := (f / 1500.00) * 100
 	log.Printf("Feeder capacity: %f %.0f%%\n", capacity, capacity)
-	event.RenderSSE("feeder", components.FeederWidget(capacity))
+	app.Event.RenderSSE("feeder", components.FeederWidget(capacity))
 }

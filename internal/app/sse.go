@@ -4,18 +4,11 @@ import (
 	"bytes"
 	"context"
 	"log"
-	"time"
 
 	"github.com/a-h/templ"
 	"github.com/gin-gonic/gin"
 )
 
-const appTimeout = time.Second * 30
-
-type Config struct {
-	Router *gin.Engine
-	Event  *Event
-}
 type Message struct {
 	Channel string
 	Data    string
@@ -36,19 +29,6 @@ type Event struct {
 
 // New event messages are broadcast to all registered client connection channels
 type ClientChan chan Message
-
-func StartOverlay() *Event {
-	router := gin.Default()
-	stream := NewServer()
-
-	app := Config{Router: router, Event: stream}
-
-	app.Routes()
-
-	go router.Run(":8080")
-
-	return stream
-}
 
 func (event *Event) RenderSSE(channel string, template templ.Component) error {
 	ctx, cancel := context.WithTimeout(context.Background(), appTimeout)
@@ -75,14 +55,12 @@ func NewServer() (event *Event) {
 		TotalClients:  make(map[chan Message]bool),
 	}
 
-	go event.listen()
-
 	return
 }
 
 // It Listens all incoming requests from clients.
 // Handles addition and removal of clients and broadcast messages to clients.
-func (stream *Event) listen() {
+func (stream *Event) Listen() {
 	for {
 		select {
 		// Add new available client

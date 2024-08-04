@@ -1,10 +1,11 @@
-package commandprocessor
+package chat
 
 import (
 	"errors"
 	"fmt"
-	"github.com/Adeithe/go-twitch/irc"
 	"log"
+
+	"github.com/Adeithe/go-twitch/irc"
 )
 
 type CommandProcessor struct {
@@ -12,8 +13,8 @@ type CommandProcessor struct {
 	parser   CommandParser
 }
 
-func NewCommandProcessor(prefix string) CommandProcessor {
-	return CommandProcessor{
+func NewCommandProcessor(prefix string) *CommandProcessor {
+	return &CommandProcessor{
 		commands: make(map[string]Command),
 		parser:   CommandParser{prefix},
 	}

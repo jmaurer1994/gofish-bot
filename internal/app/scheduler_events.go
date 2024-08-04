@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"encoding/json"
@@ -7,21 +7,21 @@ import (
 	"log"
 )
 
-func registerSchedulerEvents(sch *scheduler.Scheduler) {
-	sch.RegisterEventHandler("camera:light:check", handleCameraLightCheck)
-	sch.RegisterEventHandler("SensorEvent:Insert", handleDatabaseEvent)
+func (app *Config) registerSchedulerEvents() {
+	app.Scheduler.RegisterEventHandler("camera:light:check", app.handleCameraLightCheck)
+	app.Scheduler.RegisterEventHandler("SensorEvent:Insert", app.handleDatabaseEvent)
 }
 
-func handleCameraLightCheck(s *scheduler.Scheduler, m scheduler.Message) {
+func (app *Config) handleCameraLightCheck(m scheduler.Message) {
 	log.Printf("Received light check event: %s\n", m)
 	switch m {
 	case "on":
-		if c.CurrentLightLevel() == 0 {
-			c.SetLightLevel(1)
+		if app.Camera.CurrentLightLevel() == 0 {
+			app.Camera.SetLightLevel(1)
 		}
 	case "off":
-		if c.CurrentLightLevel() > 0 {
-			c.ZeroLight()
+		if app.Camera.CurrentLightLevel() > 0 {
+			app.Camera.ZeroLight()
 		}
 	}
 }
@@ -32,7 +32,7 @@ type SensorEventPayload struct {
 	Samples   []int `json:"samples"`
 }
 
-func handleDatabaseEvent(s *scheduler.Scheduler, m scheduler.Message) {
+func (app *Config) handleDatabaseEvent(m scheduler.Message) {
 	log.Printf("Received sensor event\n")
 	var payload SensorEventPayload
 	if err := json.Unmarshal([]byte(m), &payload); err != nil {
@@ -46,5 +46,5 @@ func handleDatabaseEvent(s *scheduler.Scheduler, m scheduler.Message) {
 		}
 	}
 
-	tic.SendChannelMessage(fmt.Sprintf("Food dispensed! Force of string pull: %d", pm))
+	app.TwitchIrc.SendChannelMessage(fmt.Sprintf("Food dispensed! Force of string pull: %d", pm))
 }

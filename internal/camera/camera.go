@@ -39,12 +39,21 @@ func (c *IpCamera) DecreaseLight() {
 		c.lightlevel--
 	}
 }
+
+func (c *IpCamera) ToggleLight() {
+	if c.CurrentLightLevel() > 0 {
+		c.ZeroLight()
+	} else {
+		c.IncreaseLight()
+	}
+}
+
 func (c *IpCamera) ZeroLight() {
 	for i := 0; i < 10; i++ {
-        err := c.sendLightAdjustRequest("5")
-        if(err != nil){
-            log.Printf("Could not zero light: %v", err)
-        }
+		err := c.sendLightAdjustRequest("5")
+		if err != nil {
+			log.Printf("Could not zero light: %v", err)
+		}
 	}
 
 	c.lightlevel = 0
