@@ -18,20 +18,20 @@ func (app *Config) registerIrcHandlers() {
 
 func (app *Config) onShardReconnect(shardID int) {
 	log.Printf("Shard #%d reconnected\n", shardID)
+	/*
+		go func() {
+			app.TwitchIrc.CloseConnection()
+			log.Printf("Disconnected\n")
+			time.Sleep(3 * time.Second)
 
-	go func() {
-		app.TwitchIrc.CloseConnection()
-		log.Printf("Disconnected\n")
-		time.Sleep(3 * time.Second)
+			if err := app.TwitchIrc.InitializeConnection(); err != nil {
+				log.Printf("Error reconnecting to IRC: %v\n", err)
+			}
 
-		if err := app.TwitchIrc.InitializeConnection(); err != nil {
-			log.Printf("Error reconnecting to IRC: %v\n", err)
-		}
-
-		app.registerIrcHandlers()
-		log.Printf("Reconnected\n")
-	}()
-
+			app.registerIrcHandlers()
+			log.Printf("Reconnected\n")
+		}()
+	*/
 }
 
 func (app *Config) onShardServerNotice(shardID int, sn irc.ServerNotice) {
