@@ -1,7 +1,6 @@
 package chat
 
 import (
-	"errors"
 	"fmt"
 	"log"
 
@@ -52,7 +51,7 @@ func (cmdproc *CommandProcessor) ProcessCommand(msg irc.ChatMessage) {
 		return
 	}
 	cmd.activateCooldown()
-	log.Println("[CMD] Executing command [%s][%s]\n", msg.Sender.Username, pc.command)
+	log.Printf("[CMD] Executing command [%s][%s]\n", msg.Sender.Username, pc.command)
 	go cmd.F(pc.args)
 
 }
