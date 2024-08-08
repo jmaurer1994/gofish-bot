@@ -28,32 +28,33 @@ func (e *CommandProcessorError) Error() string {
 	return fmt.Sprintf("CommandProcessingError:\t%s", e.message)
 }
 
-func (cmdproc *CommandProcessor) ProcessCommand(msg irc.ChatMessage) error {
+func (cmdproc *CommandProcessor) ProcessCommand(msg irc.ChatMessage) {
 	pc, err := cmdproc.parser.ParseCommand(msg.Text)
 
 	if err != nil {
-		return nil
+		return
 	}
 
 	cmd, ok := cmdproc.commands[pc.command]
 
 	if !ok {
-		return errors.New("Command not found")
+		log.Printf("[CMD] Command not found [%s][%s]\n", msg.Sender.Username, pc.command)
+		return
 	}
 
 	if cmd.IsModCommand && !msg.Sender.IsModerator {
-		return errors.New("Command is moderators only")
+		log.Printf("[CMD] Command is moderators only [%s][%s]\n", msg.Sender.Username, pc.command)
+		return
 	}
 
 	if cmd.onCooldown {
-		return errors.New("Command on cooldown")
+		log.Printf("[CMD] Command on cooldown [%s][%s]\n", msg.Sender.Username, pc.command)
+		return
 	}
-	log.Println("Activating cooldown")
 	cmd.activateCooldown()
-	log.Println("Running command function")
+	log.Println("[CMD] Executing command [%s][%s]\n", msg.Sender.Username, pc.command)
 	go cmd.F(pc.args)
 
-	return nil
 }
 
 func (cmdproc *CommandProcessor) RegisterCommand(cmd Command) {

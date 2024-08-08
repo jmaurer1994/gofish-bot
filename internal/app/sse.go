@@ -66,13 +66,13 @@ func (s *SSEvent) Listen() {
 		// Add new available client
 		case client := <-s.NewClients:
 			s.TotalClients[client] = true
-			log.Printf("Client added. %d registered clients", len(s.TotalClients))
+			log.Printf("[SSE] Client added. %d registered clients", len(s.TotalClients))
 
 		// Remove closed client
 		case client := <-s.ClosedClients:
 			delete(s.TotalClients, client)
 			close(client)
-			log.Printf("Removed client. %d registered clients", len(s.TotalClients))
+			log.Printf("[SSE] Removed client. %d registered clients", len(s.TotalClients))
 
 		// Broadcast message to client
 		case eventMsg := <-s.Message:
