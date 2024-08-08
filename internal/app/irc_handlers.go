@@ -55,5 +55,5 @@ func (app *Config) onChannelMessage(shardID int, msg irc.ChatMessage) {
 }
 
 func (app *Config) onRawMessage(shardID int, msg irc.Message) {
-	log.Printf("#%s: %s\n", msg.Sender.Username, msg.Raw)
+	//log.Printf("#%s: %s\n", msg.Sender.Username, msg.Raw)
 }
