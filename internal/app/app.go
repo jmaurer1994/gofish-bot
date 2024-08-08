@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jmaurer1994/gofish-bot/internal/camera"
 	"github.com/jmaurer1994/gofish-bot/internal/chat"
 	"github.com/jmaurer1994/gofish-bot/internal/database"
@@ -47,7 +48,9 @@ func (app *Config) Start() {
 
 	go app.Router.Run(":8080")
 	go app.Overlay.Listen()
-	go app.Db.Listen(context.Background())
+	go app.Db.Listen(context.Background(), "sensoreventinsert", func(n *pgconn.Notification) {
+		app.Scheduler.GenerateEvent("SensorEvent:Insert", scheduler.Message(n.Payload))
+	})
 	// Create a channel to receive os.Signal values.operator
 	sigs := make(chan os.Signal, 1)
 

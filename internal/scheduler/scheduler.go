@@ -66,13 +66,13 @@ func (s *Scheduler) Start() {
 		task.ticker = time.NewTicker(task.Interval)
 		go func(task *Task) {
 			if task.RunAtStart && task.Enabled {
-				log.Printf("[Scheduler]Running task %s\n", task.T)
+				log.Printf("[Scheduler] Running task %s\n", task.T)
 				task.F()
 			}
 			for {
 				<-task.ticker.C
 				if task.Enabled {
-					log.Printf("[Scheduler]Running task %s\n", task.T)
+					log.Printf("[Scheduler] Running task %s\n", task.T)
 					task.F()
 				}
 			}

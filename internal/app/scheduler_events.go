@@ -14,14 +14,15 @@ func (app *Config) registerSchedulerEvents() {
 }
 
 func (app *Config) handleCameraLightCheck(m scheduler.Message) {
-	log.Printf("Received light check event: %s\n", m)
 	switch m {
 	case "on":
 		if app.Camera.CurrentLightLevel() == 0 {
+			log.Println("[Camera] Turning light on")
 			app.Camera.SetLightLevel(1)
 		}
 	case "off":
 		if app.Camera.CurrentLightLevel() > 0 {
+			log.Println("[Camera] Turning light off")
 			app.Camera.ZeroLight()
 		}
 	}
@@ -34,10 +35,9 @@ type SensorEventPayload struct {
 }
 
 func (app *Config) handleDatabaseEvent(m scheduler.Message) {
-	log.Printf("Received sensor event\n")
 	var payload SensorEventPayload
 	if err := json.Unmarshal([]byte(m), &payload); err != nil {
-		log.Printf("Error while unmarshalling payload: %v\n", err)
+		log.Printf("[Database] Error while unmarshalling payload: %v\n", err)
 		return
 	}
 	var pm int

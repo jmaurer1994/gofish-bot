@@ -5,19 +5,17 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type PGClient struct {
-	pool                *pgxpool.Pool
-	listening           bool
-	NotificationChannel chan (string)
+	pool      *pgxpool.Pool
+	listening bool
 }
 
 func NewPGClient(databaseUrl string) (*PGClient, error) {
-	var pgc = &PGClient{
-		NotificationChannel: make(chan string, 10),
-	}
+	var pgc = &PGClient{}
 
 	var err error
 	pgc.pool, err = pgxpool.New(context.Background(), databaseUrl)
@@ -30,7 +28,9 @@ func NewPGClient(databaseUrl string) (*PGClient, error) {
 	return pgc, err
 }
 
-func (pgc *PGClient) Listen(ctx context.Context) {
+type NotificationFunction func(n *pgconn.Notification)
+
+func (pgc *PGClient) Listen(ctx context.Context, channel string, nf NotificationFunction) {
 	conn, err := pgc.pool.Acquire(ctx)
 
 	if err != nil {
@@ -42,14 +42,13 @@ func (pgc *PGClient) Listen(ctx context.Context) {
 		conn.Release()
 	}()
 
-	_, err = conn.Exec(ctx, "listen sensoreventinsert")
+	_, err = conn.Exec(ctx, fmt.Sprintf("listen %s", channel))
 	if err != nil {
 		log.Printf("[Database] Error listening to event: %v\n", err)
 		return
 	}
 
 	for {
-
 		notification, err := conn.Conn().WaitForNotification(ctx)
 
 		if err != nil {
@@ -58,11 +57,11 @@ func (pgc *PGClient) Listen(ctx context.Context) {
 		}
 
 		if ctx.Err() != nil {
+			log.Printf("[Database] Listener context error: %v\n", ctx.Err())
 			return
 		}
 
 		log.Printf("[Database] Received event on %s\n%s\n", notification.Channel, notification.Payload)
-		pgc.NotificationChannel <- notification.Payload
-
+		nf(notification)
 	}
 }
