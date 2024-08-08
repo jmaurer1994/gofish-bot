@@ -43,7 +43,6 @@ type Config struct {
 }
 
 func (app *Config) Start() {
-	log.Println("Starting task scheduler")
 	app.Scheduler.Start()
 
 	go app.Router.Run(":8080")

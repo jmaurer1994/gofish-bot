@@ -92,7 +92,7 @@ func (tic *TwitchIrcClient) ConnectToChannel() error {
 	if err := tic.reader.Join(tic.Channel); err != nil {
 		return err
 	}
-	log.Printf("<Connected to channel>[%s:%s]\n", tic.Channel, tic.Username)
+	log.Printf("[IRC] Reader connected to channel: %s\n", tic.Channel)
 	return nil
 }
 

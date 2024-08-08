@@ -57,6 +57,8 @@ func (s *Scheduler) GenerateEvent(e EventID, m Message) {
 }
 
 func (s *Scheduler) Start() {
+	log.Println("[Scheduler] Starting scheduler")
+
 	for _, task := range s.tasks {
 		if task.ticker != nil {
 			task.ticker.Reset(task.Interval)
