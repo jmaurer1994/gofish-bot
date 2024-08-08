@@ -1,13 +1,15 @@
 package main
 
 import (
-	"github.com/jmaurer1994/gofish-bot/internal/app"
-	"github.com/jmaurer1994/gofish-bot/internal/app/views/components"
 	"log"
+	"math/rand"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/jmaurer1994/gofish-bot/internal/app"
+	"github.com/jmaurer1994/gofish-bot/internal/app/views/components"
 )
 
 var (
@@ -28,12 +30,13 @@ func main() {
 func timeUpdate() {
 	for {
 
-		time.Sleep(time.Second * 100)
+		time.Sleep(time.Second * 10)
 		//		currentTime := fmt.Sprintf("The Current Time Is %v", now)
 
 		// Send current time to clients message channel
 		component := components.TimeWidget("10", "30", "moonrise")
 		event.RenderSSE("weather", components.WeatherWidget([]string{"01d"}, "72", "23.5", "55", "Full Moon", "moon-full"))
 		event.RenderSSE("time", component)
+		event.RenderSSE("feeder", components.FeederWidget(rand.Float64()*100))
 	}
 }
