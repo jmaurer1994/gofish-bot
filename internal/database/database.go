@@ -47,6 +47,7 @@ func (pgc *PGClient) Listen(ctx context.Context, channel string, nf Notification
 		log.Printf("[Database] Error listening to event: %v\n", err)
 		return
 	}
+	log.Printf("Listening for notifications on channel %s\n", channel)
 
 	for {
 		notification, err := conn.Conn().WaitForNotification(ctx)
