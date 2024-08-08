@@ -3,8 +3,9 @@ package database
 import (
 	"context"
 	"fmt"
+	"log"
+
 	"github.com/jackc/pgx/v5/pgxpool"
-	"os"
 )
 
 type PGClient struct {
@@ -33,7 +34,7 @@ func (pgc *PGClient) Listen(ctx context.Context) {
 	conn, err := pgc.pool.Acquire(ctx)
 
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Error acquiring connection:", err)
+		log.Printf("[Database] Error acquiring connection: %v\n", err)
 		return
 	}
 
@@ -43,7 +44,7 @@ func (pgc *PGClient) Listen(ctx context.Context) {
 
 	_, err = conn.Exec(ctx, "listen sensoreventinsert")
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Error listening to event", err)
+		log.Printf("[Database] Error listening to event: %v\n", err)
 		return
 	}
 
@@ -52,7 +53,7 @@ func (pgc *PGClient) Listen(ctx context.Context) {
 		notification, err := conn.Conn().WaitForNotification(ctx)
 
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "Error waiting for notification:", err)
+			log.Printf("[Database] Error waiting for notification: %v\n", err)
 			return
 		}
 
@@ -60,6 +61,7 @@ func (pgc *PGClient) Listen(ctx context.Context) {
 			return
 		}
 
+		log.Printf("[Database] Received event on %s\n%s\n", notification.Channel, notification.Payload)
 		pgc.NotificationChannel <- notification.Payload
 
 	}
