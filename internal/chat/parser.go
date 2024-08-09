@@ -3,7 +3,6 @@ package chat
 // TODO: not sure if this needs more length/bounds/etc checking
 import (
 	"fmt"
-	"log"
 	"strings"
 )
 
@@ -30,7 +29,6 @@ func (cmdparser *CommandParser) ParseCommand(s string) (ParsedCommand, error) {
 	t := []rune(tokens[0])
 
 	p := string(t[0])
-	log.Printf("Prefix: %s\n", p)
 	if p != cmdparser.commandprefix {
 		return ParsedCommand{}, &CommandParseError{"Prefix mismatch"}
 	}
