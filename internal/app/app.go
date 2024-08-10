@@ -19,6 +19,8 @@ import (
 	"github.com/jmaurer1994/gofish-bot/internal/twitch"
 	"github.com/jmaurer1994/gofish-bot/internal/weather"
 	"github.com/joho/godotenv"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 )
 
 const appTimeout = time.Second * 30
@@ -34,6 +36,7 @@ type Config struct {
 	Camera    *camera.IpCamera
 	Scheduler *scheduler.Scheduler
 	OwmApi    *weather.OwmClient
+	S3        *minio.Client
 
 	Data struct {
 		Countdown    Countdown
@@ -76,6 +79,7 @@ func (app *Config) Init() {
 	app.Routes()
 
 	app.cameraSetup()
+	app.s3Setup()
 	app.owmSetup()
 	app.obsSetup()
 	app.twitchSetup()
@@ -93,6 +97,20 @@ func (app *Config) dbSetup() {
 	}
 
 	app.Db = db
+}
+
+func (app *Config) s3Setup() {
+	s3client, err := minio.New(os.Getenv("S3_ENDPOINT"), &minio.Options{
+		Creds:  credentials.NewStaticV4(os.Getenv("S3_ID"), os.Getenv("S3_SECRET"), ""),
+		Secure: true,
+	})
+
+	if err != nil {
+		log.Printf("[S3]: %v", err)
+		return
+	}
+
+	app.S3 = s3client
 }
 
 func (app *Config) owmSetup() {

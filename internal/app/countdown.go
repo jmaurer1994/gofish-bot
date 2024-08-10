@@ -12,22 +12,21 @@ type Countdown struct {
 }
 
 func NewCountdown(w weather.OneCallResponse) Countdown {
-	currentTime := int(time.Now().UnixMilli() / 1000)
-	riseTime := w.Current.Sunrise - currentTime
-	setTime := w.Current.Sunset - currentTime
+	currentSeconds := int(time.Now().UnixMilli() / 1000)
+	minutesToSunRise := (w.Current.Sunrise - currentSeconds) / 60
+	minutesToMoonRise := (w.Current.Sunset - currentSeconds) / 60
+
 	target := ""
 	var targetTime int
 
 	switch {
-	case riseTime > 0:
+	case minutesToSunRise >= 5: //[12am, sunrise)
 		target = "sunrise"
-
 		targetTime = w.Current.Sunrise
-	case setTime > 0:
-
+	case minutesToMoonRise >= 5: //[sunrise, sunset)
 		target = "moonrise"
 		targetTime = w.Current.Sunset
-	default:
+	default: //[sunset, 12am)
 		target = "sunrise"
 		targetTime = w.Daily[1].Sunrise
 	}

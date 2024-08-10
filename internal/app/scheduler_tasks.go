@@ -1,21 +1,26 @@
 package app
 
 import (
+	"context"
+	"encoding/base64"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/jmaurer1994/gofish-bot/internal/app/views/components"
 	"github.com/jmaurer1994/gofish-bot/internal/scheduler"
+	"github.com/minio/minio-go/v7"
 )
 
 func (app *Config) registerSchedulerTasks() {
 	app.Scheduler.RegisterTask(scheduler.Task{
 		T:          "source:screenshot:save",
-		Enabled:    false,
-		Interval:   time.Duration(30) * time.Second,
+		Enabled:    true,
+		Interval:   time.Duration(30) * time.Minute,
 		F:          app.SavePondCameraScreenshot,
 		RunAtStart: true,
 	})
@@ -79,10 +84,30 @@ func (app *Config) SavePondCameraScreenshot() {
 		return //light on, don't take screenshot
 	}
 
-	err := app.Obs.ScreenshotSource("PondCamera")
+	screenshot, err := app.Obs.ScreenshotSource("PondCamera")
+
+	// remove the `data:image/png;base64,...` prefix
+	data := screenshot[strings.IndexByte(screenshot, ',')+1:]
+
+	reader := base64.NewDecoder(base64.StdEncoding, strings.NewReader(data))
 
 	if err != nil {
 		log.Printf("Could not save screenshot: %v\n", err)
+	}
+
+	_, err = app.S3.PutObject(
+		context.Background(),
+		"pond-cam",
+		fmt.Sprintf("%s.png", time.Now().Format("2006-02-01_150405")),
+		reader,
+		-1,
+		minio.PutObjectOptions{
+			ContentType: "image/png",
+		},
+	)
+
+	if err != nil {
+		log.Printf("Error saving object to storage: %v\n", err)
 	}
 }
 

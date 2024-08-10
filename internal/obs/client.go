@@ -2,26 +2,27 @@ package obs
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/andreykaipov/goobs"
 	"github.com/andreykaipov/goobs/api/requests/sceneitems"
 	"github.com/andreykaipov/goobs/api/requests/sources"
-	"time"
 )
 
 type GoobsClient struct {
-	server string
-	client *goobs.Client
-    screenshotDirectory string
-    screenshotFormat string
-    screenshotQuality float64
+	server              string
+	client              *goobs.Client
+	screenshotDirectory string
+	screenshotFormat    string
+	screenshotQuality   float64
 }
 
 func NewGoobsClient(server, password, screenshotDirectory, screenshotFormat string, screenshotQuality float64) (*GoobsClient, error) {
 	gc := &GoobsClient{
-		server: server,
-        screenshotDirectory: screenshotDirectory,
-        screenshotFormat: screenshotFormat,
-        screenshotQuality: screenshotQuality,
+		server:              server,
+		screenshotDirectory: screenshotDirectory,
+		screenshotFormat:    screenshotFormat,
+		screenshotQuality:   screenshotQuality,
 	}
 
 	client, err := goobs.New(server, goobs.WithPassword(password))
@@ -90,17 +91,17 @@ func (gc *GoobsClient) setSourceVisibility(scene string, sourceId int, visible b
 	return err
 }
 
-// TODO: use env var for base screenshot location?
-func (gc *GoobsClient) ScreenshotSource(sourceName string) error {
-    savePath := fmt.Sprintf("%s\\%s\\%d.png", gc.screenshotDirectory, sourceName,  time.Now().Unix())
-    params := &sources.SaveSourceScreenshotParams{
-        SourceName: &sourceName,
-        ImageFilePath: &savePath,
-        ImageFormat: &gc.screenshotFormat,
-        ImageCompressionQuality: &gc.screenshotQuality,
+func (gc *GoobsClient) ScreenshotSource(sourceName string) (string, error) {
+	params := &sources.GetSourceScreenshotParams{
+		SourceName:              &sourceName,
+		ImageFormat:             &gc.screenshotFormat,
+		ImageCompressionQuality: &gc.screenshotQuality,
+	}
+	screenshot, err := gc.client.Sources.GetSourceScreenshot(params)
 
-    }
-	_, err := gc.client.Sources.SaveSourceScreenshot(params)
+	if err != nil {
+		return "", err
+	}
 
-	return err
+	return screenshot.ImageData, err
 }
