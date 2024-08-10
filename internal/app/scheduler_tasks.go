@@ -86,10 +86,7 @@ func (app *Config) SavePondCameraScreenshot() {
 
 	screenshot, err := app.Obs.ScreenshotSource("PondCamera")
 
-	// remove the `data:image/png;base64,...` prefix
-	data := screenshot[strings.IndexByte(screenshot, ',')+1:]
-
-	reader := base64.NewDecoder(base64.StdEncoding, strings.NewReader(data))
+	reader := base64.NewDecoder(base64.StdEncoding, strings.NewReader(screenshot))
 
 	if err != nil {
 		log.Printf("Could not save screenshot: %v\n", err)
@@ -98,7 +95,7 @@ func (app *Config) SavePondCameraScreenshot() {
 	_, err = app.S3.PutObject(
 		context.Background(),
 		"pond-cam",
-		fmt.Sprintf("%s.png", time.Now().Format("2006-02-01_150405")),
+		fmt.Sprintf("%s.png", time.Now().Format("2006-01-02_150405")),
 		reader,
 		-1,
 		minio.PutObjectOptions{
