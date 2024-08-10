@@ -2,6 +2,7 @@ package obs
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/andreykaipov/goobs"
@@ -103,5 +104,6 @@ func (gc *GoobsClient) ScreenshotSource(sourceName string) (string, error) {
 		return "", err
 	}
 
-	return screenshot.ImageData, err
+	data := screenshot.ImageData[strings.IndexByte(screenshot.ImageData, ',')+1:]
+	return data, err
 }
