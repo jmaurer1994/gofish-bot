@@ -80,7 +80,7 @@ func (app *Config) SavePondCameraScreenshot() {
 		return //light on, don't take screenshot
 	}
 
-	fn := fmt.Sprintf("%d.png", time.Now().Unix())
+	fn := fmt.Sprintf("%d", time.Now().Unix())
 	err := app.Obs.ScreenhotToBucket("PondCamera", fn, "pond-cam", app.S3)
 	if err != nil {
 		log.Printf("[Task] Error saving object to storage: %v\n", err)
