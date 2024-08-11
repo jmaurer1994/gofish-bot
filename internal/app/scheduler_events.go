@@ -46,6 +46,14 @@ func (app *Config) handleDatabaseEvent(m scheduler.Message) {
 			pm = e
 		}
 	}
-
-	app.TwitchIrc.SendChannelMessage(fmt.Sprintf("Food dispensed! Force of string pull: %d", pm))
+	if app.Camera.CurrentLightLevel() == 0 {
+		fn := fmt.Sprintf("%d-%d", payload.Timestamp, payload.Event_ID)
+		err := app.Obs.ScreenhotToBucket("PondCamera", fn, "pond-cam", app.S3)
+		if err != nil {
+			log.Printf("[OBS] Error saving screenshot: %v\n", err)
+		} else {
+			log.Printf("[OBS] Saved screenshot to cloud %s.png\n", fn)
+		}
+	}
+	//app.TwitchIrc.SendChannelMessage(fmt.Sprintf("Food dispensed! Force of string pull: %d", pm))
 }

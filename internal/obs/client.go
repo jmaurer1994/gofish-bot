@@ -1,6 +1,9 @@
 package obs
 
 import (
+	"context"
+	"encoding/base64"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -8,6 +11,7 @@ import (
 	"github.com/andreykaipov/goobs"
 	"github.com/andreykaipov/goobs/api/requests/sceneitems"
 	"github.com/andreykaipov/goobs/api/requests/sources"
+	"github.com/minio/minio-go/v7"
 )
 
 type GoobsClient struct {
@@ -105,5 +109,33 @@ func (gc *GoobsClient) ScreenshotSource(sourceName string) (string, error) {
 	}
 
 	data := screenshot.ImageData[strings.IndexByte(screenshot.ImageData, ',')+1:]
-	return data, err
+	return data, nil
+}
+
+func (gc *GoobsClient) ScreenhotToBucket(sourceName, fileName, bucket string, s3conn *minio.Client) error {
+
+	screenshot, err := gc.ScreenshotSource(sourceName)
+
+	if err != nil {
+		return errors.Join(errors.New("Error screenshotting souce"), err)
+	}
+
+	reader := base64.NewDecoder(base64.StdEncoding, strings.NewReader(screenshot))
+
+	_, err = s3conn.PutObject(
+		context.Background(),
+		bucket,
+		fmt.Sprintf("%s.png", fileName),
+		reader,
+		-1,
+		minio.PutObjectOptions{
+			ContentType: "image/png",
+		},
+	)
+
+	if err != nil {
+		return errors.Join(errors.New("Error saving object to storage"), err)
+	}
+
+	return nil
 }
