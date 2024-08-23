@@ -55,6 +55,7 @@ func (c *InferenceClient) RunTask(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
+			c.handleTaskResult([]byte(""))
 			fmt.Println("Context done")
 			return
 		default:
@@ -73,7 +74,7 @@ func (c *InferenceClient) handleTaskResult(message []byte) {
 	s := string(message)
 	err := json.Unmarshal([]byte(string(s)), &results)
 	if err != nil {
-		fmt.Printf("Error unmarshalling JSON: %v\n%s\n", err, s)
+		fmt.Printf("Error unmarshalling JSON: %v\n", err)
 		return
 	}
 	if len(results) == 0 {
@@ -124,7 +125,7 @@ func (c *InferenceClient) receiveMessage() ([]byte, error) {
 type TaskResult struct {
 	Class      int       `json:"class"`
 	Name       string    `json:"name"`
-	Track_Id   int       `json:"track_id"`
+	Track_Id   *int      `json:"track_id,omitempty"`
 	Confidence float64   `json:"confidence"`
 	Box        *Box      `json:"box,omitempty"`      // Only for detection models
 	Segments   *Segments `json:"segments,omitempty"` // Only for segmentation models
