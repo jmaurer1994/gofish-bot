@@ -114,6 +114,6 @@ func (app *Config) getStats(args []string) {
 func (app *Config) runTracker(args []string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	go app.Tracker.RunTask(ctx)
+	app.Tracker.RunTask(ctx)
 
 }
