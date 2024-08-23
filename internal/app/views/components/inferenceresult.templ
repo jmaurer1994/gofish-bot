@@ -19,12 +19,12 @@ templ InferenceResult(results []infer.TaskResult) {
 	<div class="inference" sse-swap="inference" hx-swap="outerHTML">
 		for _, result := range results {
 			<div class={ "inference-result", position(result.Box.X1, result.Box.Y1), size(result.Box.Y2 - result.Box.Y1, result.Box.X2 - result.Box.X1) }>
-				@AnnotationTag(result.Name)
+				@AnnotationTag(result.Name, result.Confidence)
 			</div>
 		}
 	</div>
 }
 
-templ AnnotationTag(name string) {
-	<span>{ name }</span>
+templ AnnotationTag(name string, confidence float64) {
+	<span class="annotation">{ fmt.Sprintf("%s %00.fpx%%") }</span>
 }
