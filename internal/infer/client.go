@@ -70,9 +70,10 @@ func (c *InferenceClient) RunTask(ctx context.Context) {
 
 func (c *InferenceClient) handleTaskResult(message []byte) {
 	var results []TaskResult
-	err := json.Unmarshal([]byte(string(message)), &results)
+	s := string(message)
+	err := json.Unmarshal([]byte(string(s)), &results)
 	if err != nil {
-		fmt.Println("Error unmarshalling JSON:", err)
+		fmt.Printf("Error unmarshalling JSON: %v\n%s\n", err, s)
 		return
 	}
 	if len(results) == 0 {
