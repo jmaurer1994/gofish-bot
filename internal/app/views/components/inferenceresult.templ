@@ -1,0 +1,30 @@
+package components
+
+import (
+	"fmt"
+	"github.com/jmaurer1994/gofish-bot/internal/infer"
+)
+
+css size(h, w float64) {
+	height: { fmt.Sprintf("%.00fpx", h) };
+	width: { fmt.Sprintf("%.00fpx", w) };
+}
+
+css position(x, y float64) {
+	left: { fmt.Sprintf("%.00fpx", x) };
+	top: { fmt.Sprintf("%.00fpx", y) };
+}
+
+templ InferenceResult(results []infer.TaskResult) {
+	<div class="inference" sse-swap="inference" hx-swap="outerHTML">
+		for _, result := range results {
+			<div class={ "inference-result", position(result.Box.X1, result.Box.Y1), size(result.Box.Y2 - result.Box.Y1, result.Box.X2 - result.Box.X1) }>
+				@AnnotationTag(result.Name)
+			</div>
+		}
+	</div>
+}
+
+templ AnnotationTag(name string) {
+	<span>{ name }</span>
+}

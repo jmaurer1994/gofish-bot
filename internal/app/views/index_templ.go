@@ -36,7 +36,7 @@ func Index() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<body><div class=\"container\" hx-ext=\"sse\" sse-connect=\"/stream\"><div class=\"overlay\"><span></span></div><div class=\"icon-bar\"><div hx-get=\"/weather\" hx-trigger=\"load\" hx-swap=\"outerHTML\"></div><div hx-get=\"/feeder\" hx-trigger=\"load\" hx-swap=\"outerHTML\"></div><div hx-get=\"/countdown\" hx-trigger=\"load\" hx-swap=\"outerHTML\"></div></div></div></body></html>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<body><div class=\"container\" hx-ext=\"sse\" sse-connect=\"/stream\"><div sse-swap=\"inference\" hx-swap=\"outerHTML\"></div><div class=\"overlay\"><span></span></div><div class=\"icon-bar\"><div hx-get=\"/weather\" hx-trigger=\"load\" hx-swap=\"outerHTML\"></div><div hx-get=\"/feeder\" hx-trigger=\"load\" hx-swap=\"outerHTML\"></div><div hx-get=\"/countdown\" hx-trigger=\"load\" hx-swap=\"outerHTML\"></div></div></div></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

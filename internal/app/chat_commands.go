@@ -43,6 +43,12 @@ func (app *Config) registerChatCommands() {
 		IsModCommand: true,
 		Cooldown:     10 * time.Second,
 	})
+	app.CmdProc.RegisterCommand(chat.Command{
+		Key:          "track",
+		F:            app.runTracker,
+		IsModCommand: true,
+		Cooldown:     10 * time.Second,
+	})
 }
 
 func (app *Config) botHelp(args []string) {
@@ -103,4 +109,10 @@ func (app *Config) getStats(args []string) {
 		}
 		app.TwitchIrc.SendChannelMessage(fmt.Sprintf("Monthly Stats: Food was dispensed %d times this Month with an average of %.0f per day, having a max/min/avg force of %.0f/%.0f/%.0f", monthlyStats.Month_total_events, monthlyStats.Daily_avg_events, monthlyStats.Month_max_force, monthlyStats.Month_min_force, monthlyStats.Month_avg_force))
 	}
+}
+
+func (app *Config) runTracker(args []string) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	app.Tracker.RunTask(ctx)
 }

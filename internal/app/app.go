@@ -11,9 +11,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jmaurer1994/gofish-bot/internal/app/views/components"
 	"github.com/jmaurer1994/gofish-bot/internal/camera"
 	"github.com/jmaurer1994/gofish-bot/internal/chat"
 	"github.com/jmaurer1994/gofish-bot/internal/database"
+	"github.com/jmaurer1994/gofish-bot/internal/infer"
 	"github.com/jmaurer1994/gofish-bot/internal/obs"
 	"github.com/jmaurer1994/gofish-bot/internal/scheduler"
 	"github.com/jmaurer1994/gofish-bot/internal/twitch"
@@ -28,6 +30,7 @@ const appTimeout = time.Second * 30
 type Config struct {
 	Router    *gin.Engine
 	Overlay   *SSEvent
+	Tracker   *infer.InferenceClient
 	TwitchApi *twitch.TwitchApiClient
 	TwitchIrc *twitch.TwitchIrcClient
 	CmdProc   *chat.CommandProcessor
@@ -53,6 +56,7 @@ func (app *Config) Start() {
 	go app.Db.Listen(context.Background(), "sensoreventinsert", func(n *pgconn.Notification) {
 		app.Scheduler.GenerateEvent("SensorEvent:Insert", scheduler.Message(n.Payload))
 	})
+
 	// Create a channel to receive os.Signal values.operator
 	sigs := make(chan os.Signal, 1)
 
@@ -78,6 +82,7 @@ func (app *Config) Init() {
 	}
 	app.Routes()
 
+	app.inferenceSetup()
 	app.cameraSetup()
 	app.s3Setup()
 	app.owmSetup()
@@ -86,6 +91,17 @@ func (app *Config) Init() {
 	app.dbSetup()
 	app.schedulerSetup()
 
+}
+
+func (app *Config) inferenceSetup() {
+	app.Tracker = infer.NewInferenceClient(
+		"track",
+		os.Getenv("INFERENCE_SOURCE"),
+		os.Getenv("INFERENCE_HOST"),
+		os.Getenv("INFERENCE_PORT"),
+		func(results []infer.TaskResult) {
+			app.Overlay.Render("inference", components.InferenceResult(results))
+		})
 }
 
 func (app *Config) dbSetup() {

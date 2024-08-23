@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"math/rand"
 	"os"
@@ -8,22 +9,42 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/jmaurer1994/gofish-bot/internal/app"
 	"github.com/jmaurer1994/gofish-bot/internal/app/views/components"
+	"github.com/jmaurer1994/gofish-bot/internal/infer"
+	"github.com/jmaurer1994/gofish-bot/internal/weather"
+	"github.com/joho/godotenv"
 )
 
 var (
-	event *app.Event
+	a      *app.Config
+	router *gin.Engine
 )
 
 func main() {
-	event = app.StartOverlay()
+	if err := godotenv.Load(); err != nil {
+		log.Fatalf("Unable to load environment file")
+	}
+
+	a = app.NewApp()
+
+	a.Routes()
+
+	go a.Router.Run()
+	go a.Overlay.Listen()
+
+	i := infer.NewInferenceClient("track", os.Getenv("INFERENCE_SOURCE"), os.Getenv("INFERENCE_HOST"), os.Getenv("INFERENCE_PORT"), func(results []infer.TaskResult) {
+		a.Overlay.Render("inference", components.InferenceResult(results))
+	})
+
+	go i.RunTask(context.TODO())
 	// Create a channel to receive os.Signal values.operator
 	sigs := make(chan os.Signal, 1)
 	// Notify the channel if a SIGINT or SIGTERM is received.
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	log.Println("Starting overlay")
-	go timeUpdate()
+	//go timeUpdate()
 	<-sigs
 }
 
@@ -34,9 +55,8 @@ func timeUpdate() {
 		//		currentTime := fmt.Sprintf("The Current Time Is %v", now)
 
 		// Send current time to clients message channel
-		component := components.TimeWidget("10", "30", "moonrise")
-		event.RenderSSE("weather", components.WeatherWidget([]string{"01d"}, "72", "23.5", "55", "Full Moon", "moon-full"))
-		event.RenderSSE("time", component)
-		event.RenderSSE("feeder", components.FeederWidget(rand.Float64()*100))
+		//        event.Render("countdown", components.CountdownWidget())
+		a.Overlay.Render("weather", components.WeatherWidget(weather.OneCallResponse{}))
+		a.Overlay.Render("feeder", components.FeederWidget(rand.Float64()*100))
 	}
 }

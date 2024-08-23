@@ -1,4 +1,4 @@
-:root {
+root {
     --overlay-border-color: rgb(00, 37, 68, 1);
     --icon-bar-bg-color: rgb(25, 37, 68, 1);
 }
@@ -178,4 +178,9 @@ body {
     margin: 10px;
     height: 80px;
     border-radius: 40px;
+}
+
+.inference-result {
+    position: absolute;
+    border: 1px solid black;
 }
