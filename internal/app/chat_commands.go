@@ -47,7 +47,7 @@ func (app *Config) registerChatCommands() {
 		Key:          "track",
 		F:            app.runTracker,
 		IsModCommand: true,
-		Cooldown:     10 * time.Second,
+		Cooldown:     45 * time.Second,
 	})
 }
 
@@ -112,7 +112,7 @@ func (app *Config) getStats(args []string) {
 }
 
 func (app *Config) runTracker(args []string) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	app.Tracker.RunTask(ctx)
+	go app.Tracker.RunTask(ctx)
 }
