@@ -23,6 +23,12 @@ templ InferenceResult(s *pb.TaskResultSet) {
 					@AnnotationTag(result.Name, result.Confidence)
 				</div>
 			}
+		} else {
+			<script>
+                (() => {
+                    console.log("hit nil pointer")
+                })();
+            </script>
 		}
 	</div>
 }
