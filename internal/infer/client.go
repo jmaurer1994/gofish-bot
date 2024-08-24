@@ -63,18 +63,13 @@ func (c *InferenceClient) RunTask(ctx context.Context) {
 	}
 
 	for {
-		select {
-		case <-ctx.Done():
-			log.Println("Context done")
+		result, err := stream.Recv()
+		if err != nil {
+			log.Println("Error receiving message:", err)
+
 			c.cb(nil)
 			return
-		default:
-			result, err := stream.Recv()
-			if err != nil {
-				log.Println("Error receiving message:", err)
-				return
-			}
-			c.cb(result)
 		}
+		c.cb(result)
 	}
 }
