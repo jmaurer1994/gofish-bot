@@ -1,0 +1,48 @@
+syntax = "proto3";
+option go_package = "github.com/jmaurer1994/gofish-bot/internal/infer/pb";
+
+service TaskService {
+  rpc StreamResults(TaskRequest) returns (stream TaskResultSet);
+}
+
+message TaskRequest {
+  string task_name = 1;
+  string source = 2;
+}
+
+message TaskResultSet {
+  repeated TaskResult results = 1;
+}
+
+message TaskResult {
+  int32 class_id = 1;
+  string name = 2;
+  int32 track_id = 3;
+  double confidence = 4;
+  Box box = 5;
+  Segments segments = 6;
+  Speed speed = 7;
+  repeated int32 shape = 8;
+}
+
+message Box {
+  double x1 = 1;
+  double x2 = 2;
+  double y1 = 3;
+  double y2 = 4;
+  double x3 = 5;
+  double x4 = 6;
+  double y3 = 7;
+  double y4 = 8;
+}
+
+message Segments {
+  repeated double x = 1;
+  repeated double y = 2;
+}
+
+message Speed {
+  double inference = 1;
+  double postprocess = 2;
+  double preprocess = 3;
+}

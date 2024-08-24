@@ -16,6 +16,7 @@ import (
 	"github.com/jmaurer1994/gofish-bot/internal/chat"
 	"github.com/jmaurer1994/gofish-bot/internal/database"
 	"github.com/jmaurer1994/gofish-bot/internal/infer"
+	"github.com/jmaurer1994/gofish-bot/internal/infer/pb"
 	"github.com/jmaurer1994/gofish-bot/internal/obs"
 	"github.com/jmaurer1994/gofish-bot/internal/scheduler"
 	"github.com/jmaurer1994/gofish-bot/internal/twitch"
@@ -99,8 +100,8 @@ func (app *Config) inferenceSetup() {
 		os.Getenv("INFERENCE_SOURCE"),
 		os.Getenv("INFERENCE_HOST"),
 		os.Getenv("INFERENCE_PORT"),
-		func(results []infer.TaskResult) {
-			app.Overlay.Render("inference", components.InferenceResult(results))
+		func(s *pb.TaskResultSet) {
+			app.Overlay.Render("inference", components.InferenceResult(s))
 		})
 }
 

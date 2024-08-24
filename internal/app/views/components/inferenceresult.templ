@@ -2,7 +2,7 @@ package components
 
 import (
 	"fmt"
-	"github.com/jmaurer1994/gofish-bot/internal/infer"
+	"github.com/jmaurer1994/gofish-bot/internal/infer/pb"
 )
 
 css size(h, w float64) {
@@ -15,12 +15,14 @@ css position(x, y float64) {
 	top: { fmt.Sprintf("%.00fpx", y) };
 }
 
-templ InferenceResult(results []infer.TaskResult) {
+templ InferenceResult(s *pb.TaskResultSet) {
 	<div class="inference" sse-swap="inference" hx-swap="outerHTML">
-		for _, result := range results {
-			<div class={ "inference-result", position(result.Box.X1, result.Box.Y1), size(result.Box.Y2 - result.Box.Y1, result.Box.X2 - result.Box.X1) }>
-				@AnnotationTag(result.Name, result.Confidence)
-			</div>
+		if s != nil {
+			for _, result := range s.Results {
+				<div class={ "inference-result", position(result.Box.X1, result.Box.Y1), size(result.Box.Y2 - result.Box.Y1, result.Box.X2 - result.Box.X1) }>
+					@AnnotationTag(result.Name, result.Confidence)
+				</div>
+			}
 		}
 	</div>
 }

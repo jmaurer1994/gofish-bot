@@ -13,6 +13,7 @@ import (
 	"github.com/jmaurer1994/gofish-bot/internal/app"
 	"github.com/jmaurer1994/gofish-bot/internal/app/views/components"
 	"github.com/jmaurer1994/gofish-bot/internal/infer"
+	"github.com/jmaurer1994/gofish-bot/internal/infer/pb"
 	"github.com/jmaurer1994/gofish-bot/internal/weather"
 	"github.com/joho/godotenv"
 )
@@ -34,9 +35,10 @@ func main() {
 	go a.Router.Run()
 	go a.Overlay.Listen()
 
-	i := infer.NewInferenceClient("track", os.Getenv("INFERENCE_SOURCE"), os.Getenv("INFERENCE_HOST"), os.Getenv("INFERENCE_PORT"), func(results []infer.TaskResult) {
-		a.Overlay.Render("inference", components.InferenceResult(results))
-	})
+	i := infer.NewInferenceClient("track", os.Getenv("INFERENCE_SOURCE"), os.Getenv("INFERENCE_HOST"), os.Getenv("INFERENCE_PORT"),
+		func(s *pb.TaskResultSet) {
+			a.Overlay.Render("inference", components.InferenceResult(s))
+		})
 
 	go i.RunTask(context.TODO())
 	// Create a channel to receive os.Signal values.operator

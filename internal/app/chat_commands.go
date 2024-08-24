@@ -8,7 +8,6 @@ import (
 
 	"github.com/jmaurer1994/gofish-bot/internal/app/views/components"
 	"github.com/jmaurer1994/gofish-bot/internal/chat"
-	"github.com/jmaurer1994/gofish-bot/internal/infer"
 )
 
 func (app *Config) registerChatCommands() {
@@ -117,5 +116,5 @@ func (app *Config) runTracker(args []string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	app.Tracker.RunTask(ctx)
-	app.Overlay.Render("inference", components.InferenceResult([]infer.TaskResult{}))
+	app.Overlay.Render("inference", components.InferenceResult(nil))
 }
