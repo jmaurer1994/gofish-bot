@@ -26,5 +26,5 @@ templ InferenceResult(results []infer.TaskResult) {
 }
 
 templ AnnotationTag(name string, confidence float64) {
-	<span class="annotation">{ fmt.Sprintf("%s %.02fpx", name, confidence) }</span>
+	<span class="annotation">{ fmt.Sprintf("%s %0.02f", name, confidence) }</span>
 }
