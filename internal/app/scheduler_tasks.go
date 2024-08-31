@@ -1,9 +1,10 @@
 package app
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -17,6 +18,7 @@ func (app *Config) registerSchedulerTasks() {
 		T:          "source:screenshot:save",
 		Enabled:    true,
 		Interval:   time.Duration(30) * time.Minute,
+		Timeout:    time.Duration(2) * time.Minute,
 		F:          app.SavePondCameraScreenshot,
 		RunAtStart: true,
 	})
@@ -25,6 +27,7 @@ func (app *Config) registerSchedulerTasks() {
 		T:          "data:weather:update",
 		Enabled:    true,
 		Interval:   time.Duration(5) * time.Minute,
+		Timeout:    time.Duration(2) * time.Minute,
 		F:          app.OwmUpdate,
 		RunAtStart: true,
 	})
@@ -33,6 +36,7 @@ func (app *Config) registerSchedulerTasks() {
 		T:          "data:weight:update",
 		Enabled:    true,
 		Interval:   time.Duration(15) * time.Minute,
+		Timeout:    time.Duration(2) * time.Minute,
 		F:          app.UpdateFeederWeight,
 		RunAtStart: true,
 	})
@@ -41,6 +45,7 @@ func (app *Config) registerSchedulerTasks() {
 		T:          "channel:reader:check",
 		Enabled:    true,
 		Interval:   time.Duration(1) * time.Hour,
+		Timeout:    time.Duration(2) * time.Minute,
 		F:          app.CheckReaderStatus,
 		RunAtStart: false,
 	})
@@ -49,17 +54,19 @@ func (app *Config) registerSchedulerTasks() {
 		T:          "source:camera:cycle",
 		Enabled:    true,
 		Interval:   time.Duration(4) * time.Hour,
+		Timeout:    time.Duration(2) * time.Minute,
 		F:          app.ResetCamera,
 		RunAtStart: false,
 	})
 }
 
-func (app *Config) OwmUpdate() {
+var ConditionsUpdate = errors.New("Could not retrieve current conditions")
+
+func (app *Config) OwmUpdate(t *scheduler.Task, ctx context.Context) error {
 	w, err := app.OwmApi.GetCurrentCondiitons()
 
 	if err != nil {
-		log.Printf("Error retrieving current conditions: %v\n", err)
-		return
+		return errors.Join(ConditionsUpdate, err)
 	}
 	app.Data.Weather = w
 	app.Data.Countdown = NewCountdown(w)
@@ -73,45 +80,60 @@ func (app *Config) OwmUpdate() {
 
 	app.Overlay.Render("weather", components.WeatherWidget(w))
 	app.Overlay.Render("countdown", components.CountdownWidget(app.Data.Countdown.Hours(), app.Data.Countdown.Minutes(), app.Data.Countdown.Target))
+
+	return nil
 }
 
-func (app *Config) SavePondCameraScreenshot() {
+var ScreenshotStorage = errors.New("Could not save screenshot")
+
+func (app *Config) SavePondCameraScreenshot(t *scheduler.Task, ctx context.Context) error {
 	if app.Camera.CurrentLightLevel() > 0 {
-		return //light on, don't take screenshot
+		return nil //light on, don't take screenshot
 	}
 
 	fn := fmt.Sprintf("%d", time.Now().Unix())
 	err := app.Obs.ScreenhotToBucket("PondCamera", fn, "pond-cam", app.S3)
 	if err != nil {
-		log.Printf("[Task] Error saving object to storage: %v\n", err)
+		return errors.Join(ScreenshotStorage, err)
 	}
+
+	return nil
 }
 
-func (app *Config) CheckReaderStatus() {
+func (app *Config) CheckReaderStatus(t *scheduler.Task, ctx context.Context) error {
 	var _, connected = app.TwitchIrc.ReaderIsConnected()
 
 	if !connected {
-		log.Printf("!! Reader is not connected !!\n")
+		t.Log("!! Reader is not connected !!\n")
 		if err := app.TwitchIrc.ConnectToChannel(); err != nil {
-			log.Printf("Error while reconnecting to channel!:\n%v\n", err)
+			t.Log(fmt.Sprintf("Error while reconnecting to channel!:\n%v\n", err))
 		}
 	}
+
+	return nil
 }
 
-func (app *Config) ResetCamera() {
+var ResetNotification = errors.New("Unable to send reset notification")
+
+func (app *Config) ResetCamera(t *scheduler.Task, ctx context.Context) error {
 	if err := app.TwitchIrc.Sendf("Resetting camera... We'll be back in a moment!"); err != nil {
-		log.Printf("Unable to send camera reset notification: %v\n", err)
+		return errors.Join(ResetNotification, err)
 	}
 	app.Obs.ToggleSourceVisibility("Main", "PondCamera")
-	log.Printf("Toggled camera source\n")
+	t.Log("Toggled camera source\n")
+
+	return nil
 }
 
-func (app *Config) UpdateFeederWeight() {
+var FeederWeightRequest = errors.New("Could not make request")
+var FeederWeightResponse = errors.New("Unable to read response body")
+var FeederWeightConversion = errors.New("Unable to convert response value to float")
+
+func (app *Config) UpdateFeederWeight(t *scheduler.Task, tx context.Context) error {
 	resp, err := http.Get("https://sensor.gofish.cam/scale/read?samples=10")
 
 	if err != nil {
-		log.Printf("Error updating feeder capacity: %v\n", err)
-		return
+		return errors.Join(FeederWeightRequest, err)
 	}
 
 	defer resp.Body.Close()
@@ -119,20 +141,17 @@ func (app *Config) UpdateFeederWeight() {
 	body, readErr := io.ReadAll(resp.Body)
 
 	if readErr != nil {
-		log.Printf("Error updating feeder capacity2: %v\n", err)
-		return
+		return errors.Join(FeederWeightResponse, err)
 	}
 
-	str := string(body)
-
-	f, convErr := strconv.ParseFloat(str, 64)
+	f, convErr := strconv.ParseFloat(string(body), 64)
 
 	if convErr != nil {
-		log.Printf("Error updating feeder capacity due to conversion error: %v\n", convErr)
-		return
+		return errors.Join(FeederWeightConversion, err)
 	}
 
 	app.Data.FeederWeight = f
 
 	app.Overlay.Render("feeder", components.FeederWidget(f))
+	return nil
 }

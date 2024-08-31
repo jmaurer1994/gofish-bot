@@ -5,23 +5,11 @@ import (
 	"time"
 )
 
-type Task struct {
-	T          TaskID
-	Enabled    bool
-	Interval   time.Duration
-	F          ExecuteFunction
-	RunAtStart bool
-
-	ticker *time.Ticker
-}
-
 type Scheduler struct {
 	tasks     []*Task
 	ec        chan Event
 	listeners map[EventID][]EventHandler
 }
-
-type ExecuteFunction func()
 
 type EventHandler func(m Message)
 
@@ -30,7 +18,6 @@ type Event struct {
 	M Message
 }
 
-type TaskID string
 type EventID string
 type Message string
 
@@ -68,14 +55,12 @@ func (s *Scheduler) Start() {
 		task.ticker = time.NewTicker(task.Interval)
 		go func(task *Task) {
 			if task.RunAtStart && task.Enabled {
-				log.Printf("[Scheduler] Running task %s\n", task.T)
-				task.F()
+				task.Run()
 			}
 			for {
 				<-task.ticker.C
 				if task.Enabled {
-					log.Printf("[Scheduler] Running task %s\n", task.T)
-					task.F()
+					task.Run()
 				}
 			}
 		}(task)
