@@ -101,9 +101,6 @@ func (app *Config) inferenceSetup() {
 		os.Getenv("INFERENCE_HOST"),
 		os.Getenv("INFERENCE_PORT"),
 		func(s *pb.TaskResultSet) {
-			if s == nil {
-				log.Println("Reseceived nil resultset")
-			}
 			app.Overlay.Render("inference", components.InferenceResult(s))
 		})
 }

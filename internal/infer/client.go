@@ -4,10 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
+	"math"
+	"time"
+
 	"github.com/jmaurer1994/gofish-bot/internal/infer/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"log"
 )
 
 type InferenceClient struct {
@@ -57,7 +60,6 @@ func (c *InferenceClient) RunTask(ctx context.Context) {
 
 	// Call StreamResults and receive results
 	stream, err := client.StreamResults(ctx, request)
-
 	if err != nil {
 		log.Printf("could not stream results: %v\n", err)
 		return
@@ -67,7 +69,9 @@ func (c *InferenceClient) RunTask(ctx context.Context) {
 		result, err := stream.Recv()
 		if err != nil {
 			log.Println("Error receiving message:", err)
+			break
 		}
+
 		c.cb(result)
 	}
 }

@@ -37,9 +37,6 @@ func main() {
 
 	i := infer.NewInferenceClient("track", os.Getenv("INFERENCE_SOURCE"), os.Getenv("INFERENCE_HOST"), os.Getenv("INFERENCE_PORT"),
 		func(s *pb.TaskResultSet) {
-			if s == nil {
-				log.Println("nil pointer received for result set")
-			}
 			a.Overlay.Render("inference", components.InferenceResult(s))
 		})
 
