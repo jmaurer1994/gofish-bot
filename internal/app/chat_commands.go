@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/jmaurer1994/gofish-bot/internal/chat"
@@ -112,7 +113,24 @@ func (app *Config) getStats(args []string) {
 }
 
 func (app *Config) runTracker(args []string) {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	var d time.Duration
+	if len(args) > 0 {
+		if min, err := strconv.Atoi(args[0]); err != nil {
+			log.Printf("Could not parse int from arg: %v\n", err)
+			return
+		} else {
+			if min >= 10 && min <= 300 {
+				d = time.Duration(min) * time.Second
+			} else {
+				log.Printf("Invalid argument - out of range [10,300]: %d\n", min)
+				return
+			}
+		}
+	} else {
+		d = 30 * time.Second
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), d)
 	defer cancel()
 	app.Tracker.RunTask(ctx)
 }
