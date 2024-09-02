@@ -5,8 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"math"
-	"time"
 
 	"github.com/jmaurer1994/gofish-bot/internal/infer/pb"
 	"google.golang.org/grpc"
