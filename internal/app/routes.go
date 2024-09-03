@@ -1,6 +1,7 @@
 package app
 
 import (
+	"bytes"
 	"context"
 	"io"
 	"log"
@@ -67,12 +68,13 @@ func (app *Config) eventHandler() gin.HandlerFunc {
 			// Stream message to client from message channel
 			if msg, ok := <-clientChan; ok {
 				template := msg.Data
+				buff := new(bytes.Buffer)
 
-				if err := template.Render(ctx, w); err != nil {
+				if err := template.Render(ctx, buff); err != nil {
 					log.Printf("[SSE] Render error: %v\n", err)
 					return false
 				}
-				ctx.SSEvent(msg.Channel, w)
+				ctx.SSEvent(msg.Channel, buff.String())
 
 				return true
 			}
