@@ -40,9 +40,11 @@ func main() {
 			a.Overlay.Render("inference", components.InferenceResult(s))
 		})
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	defer cancel()
-	go i.RunTask(ctx)
+	//ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	//defer cancel()
+	//go i.RunTask(ctx)
+	go i.RunTask(context.Background())
+
 	// Create a channel to receive os.Signal values.operator
 	sigs := make(chan os.Signal, 1)
 	// Notify the channel if a SIGINT or SIGTERM is received.

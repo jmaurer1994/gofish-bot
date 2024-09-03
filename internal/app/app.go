@@ -30,7 +30,7 @@ const appTimeout = time.Second * 30
 
 type Config struct {
 	Router    *gin.Engine
-	Overlay   *SSEvent
+	Overlay   *EventServer
 	Tracker   *infer.InferenceClient
 	TwitchApi *twitch.TwitchApiClient
 	TwitchIrc *twitch.TwitchIrcClient

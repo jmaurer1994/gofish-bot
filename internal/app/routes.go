@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -62,9 +63,17 @@ func (app *Config) eventHandler() gin.HandlerFunc {
 			return
 		}
 		ctx.Stream(func(w io.Writer) bool {
+
 			// Stream message to client from message channel
 			if msg, ok := <-clientChan; ok {
-				ctx.SSEvent(msg.Channel, msg.Data)
+				template := msg.Data
+
+				if err := template.Render(ctx, w); err != nil {
+					log.Printf("[SSE] Render error: %v\n", err)
+					return false
+				}
+				ctx.SSEvent(msg.Channel, w)
+
 				return true
 			}
 			return false
