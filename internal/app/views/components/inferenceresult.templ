@@ -1,6 +1,7 @@
 package components
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/jmaurer1994/gofish-bot/internal/infer/pb"
 )
@@ -15,12 +16,31 @@ css position(x, y float64) {
 	top: { fmt.Sprintf("%.00fpx", y) };
 }
 
+func SegmentsToPolygon(x, y []float64) string {
+	if len(x) != len(y) {
+		return ""
+	}
+
+	buff := new(bytes.Buffer)
+
+	for i := range x {
+		fmt.Fprintf(buff, "%.0f%% %.0f%%", (x[i]/1920)*100, (y[i]/1080)*100)
+
+		if i < len(x)-1 {
+			fmt.Fprint(buff, ", ")
+		}
+	}
+
+	return fmt.Sprintf("polygon(%s);", buff.String())
+}
+
 templ InferenceResult(s *pb.TaskResultSet) {
 	<div class="inference" sse-swap="inference" hx-swap="outerHTML">
 		if s != nil {
 			for _, result := range s.Results {
 				<div class={ "inference-result", position(result.Box.X1, result.Box.Y1), size(result.Box.Y2 - result.Box.Y1, result.Box.X2 - result.Box.X1) }>
 					@AnnotationTag(result.Name, result.Confidence)
+					@SegmentMask(result.Segments.X, result.Segments.Y)
 				</div>
 			}
 		}
@@ -29,4 +49,17 @@ templ InferenceResult(s *pb.TaskResultSet) {
 
 templ AnnotationTag(name string, confidence float64) {
 	<span class="annotation">{ fmt.Sprintf("%s %0.02f", name, confidence) }</span>
+}
+
+css mask(x, y []float64) {
+	clip-path: { SegmentsToPolygon(x, y) };
+}
+
+templ SegmentMask(x, y []float64) {
+	<style type="text/css">
+        .mask {
+            background-color: gray;
+        }
+    </style>
+	<span class={ "mask", mask(x, y) }></span>
 }
