@@ -40,8 +40,9 @@ templ InferenceResult(s *pb.TaskResultSet) {
 			for _, result := range s.Results {
 				<div class={ "inference-result", position(result.Box.X1, result.Box.Y1), size(result.Box.Y2 - result.Box.Y1, result.Box.X2 - result.Box.X1) }>
 					@AnnotationTag(result.Name, result.Confidence)
-					@SegmentMask(result.Segments.X, result.Segments.Y)
 				</div>
+                
+				@SegmentMask(result.Segments.X, result.Segments.Y)
 			}
 		}
 	</div>
@@ -52,14 +53,22 @@ templ AnnotationTag(name string, confidence float64) {
 }
 
 css mask(x, y []float64) {
-	clip-path: { SegmentsToPolygon(x, y) };
+	clip-path: { templ.SafeCSSProperty(SegmentsToPolygon(x, y)) };
 }
 
 templ SegmentMask(x, y []float64) {
 	<style type="text/css">
         .mask {
             background-color: gray;
+            opacity: 0.8;
+
+            width: 100%;
+            height: 100%;
+            
+            position: absolute;
+            left: 0;
+            top: 0;
         }
     </style>
-	<span class={ "mask", mask(x, y) }></span>
+	<div class={ "mask", mask(x, y) }></div>
 }
