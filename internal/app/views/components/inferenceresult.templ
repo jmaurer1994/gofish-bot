@@ -6,14 +6,103 @@ import (
 	"github.com/jmaurer1994/gofish-bot/internal/infer/pb"
 )
 
+var colors = []string{
+	"orangered",   //0 - Orange
+	"azure",       //1 - Bones
+	"slateblue",   //2 - O.G.
+	"lightsalmon", //3 - Splat
+	"orchid",      //4 - Spots
+	"royalblue",   //5 - Tiny
+}
+
 css size(h, w float64) {
 	height: { fmt.Sprintf("%.00fpx", h) };
 	width: { fmt.Sprintf("%.00fpx", w) };
 }
 
 css position(x, y float64) {
+	position: absolute;
 	left: { fmt.Sprintf("%.00fpx", x) };
 	top: { fmt.Sprintf("%.00fpx", y) };
+}
+
+css fadeOut(duration string) {
+	animation-name: disappear;
+	animation-duration: { duration };
+	animation-fill-mode: forwards;
+}
+
+css border(size string, color string) {
+	border: { fmt.Sprintf("%s solid %s", size, color) };
+}
+
+var inferenceHandle = templ.NewOnceHandle()
+
+templ InferenceResult(s *pb.TaskResultSet) {
+	@inferenceHandle.Once() {
+		<style type="text/css">
+             @keyframes disappear {
+                0% {
+                    opacity: 1;
+                }
+
+                80% {
+                    opacity: 1;
+                }
+
+                100% {
+                    opacity: 0;
+                }
+            }
+        </style>
+	}
+	<div class="inference" sse-swap="inference" hx-swap="outerHTML">
+		if s != nil {
+			<div class={ fadeOut("100ms") }>
+				for _, result := range s.Results {
+					@BoundingBox(result.ClassId, result.Box.X1, result.Box.Y1, result.Box.X2, result.Box.Y2)
+					@AnnotationTag(result.ClassId, result.Name, result.Confidence, result.Box.X1, result.Box.Y1)
+					@SegmentMask(result.ClassId, result.Segments.X, result.Segments.Y)
+				}
+			</div>
+		}
+	</div>
+}
+
+templ BoundingBox(classId int32, X1, Y1, X2, Y2 float64) {
+	<div
+		class={ border("4px", colors[classId]), 
+                position(X1, Y1), 
+                size(Y2 - Y1, X2 - X1) }
+	></div>
+}
+
+css annotation(color string) {
+	font-family: "sans-serif";
+	font-size: 1.5rem;
+	font-weight: bold;
+	color: white;
+	padding: 0px 50px;
+	background-color: { color };
+}
+
+templ AnnotationTag(classId int32, name string, confidence, x, y float64) {
+	<span class={ annotation(colors[classId]), position(x, y) }>{ fmt.Sprintf("%s[%d] - %0.1f%%", name, classId, confidence*100) }</span>
+}
+
+css mask(color string, x, y []float64) {
+	clip-path: { templ.SafeCSSProperty(SegmentsToPolygon(x, y)) };
+	background-color: { color };
+	opacity: 0.8;
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+templ SegmentMask(classId int32, x, y []float64) {
+	<div class={ mask(colors[classId], x, y) }></div>
 }
 
 func SegmentsToPolygon(x, y []float64) string {
@@ -32,44 +121,4 @@ func SegmentsToPolygon(x, y []float64) string {
 	}
 
 	return fmt.Sprintf("polygon(%s);", buff.String())
-}
-
-templ InferenceResult(s *pb.TaskResultSet) {
-	<div class="inference" sse-swap="inference" hx-swap="outerHTML">
-		if s != nil {
-			<div class="inference-frame">
-				for _, result := range s.Results {
-					<div class={ "inference-result", position(result.Box.X1, result.Box.Y1), size(result.Box.Y2 - result.Box.Y1, result.Box.X2 - result.Box.X1) }>
-						@AnnotationTag(result.Name, result.Confidence)
-					</div>
-					@SegmentMask(result.Segments.X, result.Segments.Y)
-				}
-			</div>
-		}
-	</div>
-}
-
-templ AnnotationTag(name string, confidence float64) {
-	<span class="annotation">{ fmt.Sprintf("%s %0.02f", name, confidence) }</span>
-}
-
-css mask(x, y []float64) {
-	clip-path: { templ.SafeCSSProperty(SegmentsToPolygon(x, y)) };
-}
-
-templ SegmentMask(x, y []float64) {
-	<style type="text/css">
-        .mask {
-            background-color: gray;
-            opacity: 0.8;
-
-            width: 100%;
-            height: 100%;
-            
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
-    </style>
-	<div class={ "mask", mask(x, y) }></div>
 }
