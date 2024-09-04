@@ -37,13 +37,14 @@ func SegmentsToPolygon(x, y []float64) string {
 templ InferenceResult(s *pb.TaskResultSet) {
 	<div class="inference" sse-swap="inference" hx-swap="outerHTML">
 		if s != nil {
-			for _, result := range s.Results {
-				<div class={ "inference-result", position(result.Box.X1, result.Box.Y1), size(result.Box.Y2 - result.Box.Y1, result.Box.X2 - result.Box.X1) }>
-					@AnnotationTag(result.Name, result.Confidence)
-				</div>
-                
-				@SegmentMask(result.Segments.X, result.Segments.Y)
-			}
+			<div class="inference-frame">
+				for _, result := range s.Results {
+					<div class={ "inference-result", position(result.Box.X1, result.Box.Y1), size(result.Box.Y2 - result.Box.Y1, result.Box.X2 - result.Box.X1) }>
+						@AnnotationTag(result.Name, result.Confidence)
+					</div>
+					@SegmentMask(result.Segments.X, result.Segments.Y)
+				}
+			</div>
 		}
 	</div>
 }

@@ -77,6 +77,10 @@ func InferenceResult(s *pb.TaskResultSet) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if s != nil {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"inference-frame\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 			for _, result := range s.Results {
 				var templ_7745c5c3_Var2 = []any{"inference-result", position(result.Box.X1, result.Box.Y1), size(result.Box.Y2-result.Box.Y1, result.Box.X2-result.Box.X1)}
 				templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
@@ -113,6 +117,10 @@ func InferenceResult(s *pb.TaskResultSet) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
 		if templ_7745c5c3_Err != nil {
@@ -147,7 +155,7 @@ func AnnotationTag(name string, confidence float64) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s %0.02f", name, confidence))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/app/views/components/inferenceresult.templ`, Line: 52, Col: 70}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/app/views/components/inferenceresult.templ`, Line: 53, Col: 70}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {

@@ -197,6 +197,9 @@ body {
 .inference-result {
     position: absolute;
     border: 4px solid skyblue;
+}
+
+.inference-frame {
     animation-name: disappear;
     animation-duration: 100ms;
     animation-fill-mode: forwards;
