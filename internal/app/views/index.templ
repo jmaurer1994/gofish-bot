@@ -1,11 +1,17 @@
 package views
 
-import "github.com/jmaurer1994/gofish-bot/internal/app/views/components"
-
 templ Index() {
 	<!DOCTYPE html>
 	<html lang="en">
-		@components.Header()
+		<head>
+			<script src="https://unpkg.com/htmx.org@2.0.1" integrity="sha384-QWGpdj554B4ETpJJC9z+ZHJcA/i59TyjxEPXiiUgN2WmTyV5OEZWCD6gQhgkdpB/" crossorigin="anonymous"></script>
+			<script src="https://unpkg.com/htmx-ext-sse@2.2.1/sse.js"></script>
+			<link rel="stylesheet" href="/style.css"/>
+			<script src="/main.js"></script>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>GoFish OBS Overlay</title>
+		</head>
 		<body>
 			<div class="container" hx-ext="sse" sse-connect="/stream">
 				<div sse-swap="inference" hx-swap="outerHTML"></div>

@@ -9,6 +9,64 @@ var slidesHandle = templ.NewOnceHandle()
 
 templ WeatherWidget(w weather.OneCallResponse) {
 	//templ WeatherWidget(conditions []string, f string, c string, humidity string, phaseText string, phase string) {
+	<style>
+        .weather {
+            height: 100px;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            padding-right: 10px;
+
+            background-color: #333333;
+            border-top-left-radius: 50px;
+            border-bottom-left-radius: 50px;
+        }
+
+        .weather-info {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            width: 275px;
+            background-color: #ffffff88;
+            border-top-right-radius: 40px;
+            border-bottom-right-radius: 40px;
+            padding: 0 10px;
+        }
+
+        .temperature span {
+            margin-right: -25px;
+        }
+
+        .humidity span {
+            margin-right: -20px;
+        }
+
+        .moon span {
+            font-size: 1.5rem !important;
+        }
+
+        .weather-info span {
+            font-size: 2.0rem;
+            font-weight: bold;
+            font-family: arial;
+        }
+
+        .weather-info img {
+            width: 80px;
+            height: 80px;
+        }
+
+        .weather-icon {
+            width: 80px;
+            height: 80px;
+            margin-left: 10px;
+            border-top-left-radius: 40px;
+            border-bottom-left-radius: 40px;
+            background-color: #ffffff25;
+        }
+    </style>
 	<div class="weather" sse-swap="weather" hx-swap="outerHTML">
 		for i, c := range w.Current.Weather {
 			if i == 0 {
@@ -19,13 +77,13 @@ templ WeatherWidget(w weather.OneCallResponse) {
 		}
 		<div class="weather-info temperature fade active">
 			<span>{ fmt.Sprintf("%.0f", w.Current.Temp) }</span>
-			<img src={ fmt.Sprintf("/assets/weather/bas/thermometer-fahrenheit.svg") }/>
+			<img src="/assets/weather/bas/thermometer-fahrenheit.svg"/>
 			<span>{ fmt.Sprintf("%.1f", weather.FToC(w.Current.Temp)) }</span>
-			<img src={ fmt.Sprintf("/assets/weather/bas/thermometer-celsius.svg") }/>
+			<img src="/assets/weather/bas/thermometer-celsius.svg"/>
 		</div>
 		<div class="weather-info humidity fade hidden">
 			<span>{ fmt.Sprintf("%d", w.Current.Humidity) }</span>
-			<img src={ fmt.Sprintf("/assets/weather/bas/humidity.svg") }/>
+			<img src="/assets/weather/bas/humidity.svg"/>
 		</div>
 		<div class="weather-info moon fade hidden">
 			if len(w.Daily) > 0 {
