@@ -3,7 +3,45 @@ package components
 import "fmt"
 
 templ CountdownWidget(hours int, minutes int, icon string) {
-	<div class="countdown" sse-swap="countdown" hx-swap="outerHTML">
+	<style type="text/css">
+       .countdown img {
+            width: 80px;
+            height: 80px;
+            margin-right: 10px;
+            background-color: rgb(0, 0, 0, .3);
+            border-top-right-radius: 40px;
+            border-bottom-right-radius: 40px;
+        }
+
+        .countdown {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            background: #6684b3;
+            border-top-right-radius: 50px;
+            border-bottom-right-radius: 50px;
+            height: 100px;
+        }
+
+        .countdown div {
+            font-size: 2.5rem;
+            font-weight: bold;
+            font-family: arial;
+            border: 2px solid #ffffffeb;
+            background-color: #ffffffcc;
+            border-radius: 8px;
+            height: 80px;
+            line-height: 80px;
+            box-shadow: 2px 2px 5px black;
+        }
+
+        .hours {
+            margin-left: 20px;
+            margin-right: 3px;
+        } 
+    </style>
+	<div class="countdown">
 		<div class="hours">
 			{ fmt.Sprintf("%02d", hours) }
 		</div>

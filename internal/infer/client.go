@@ -8,7 +8,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/jmaurer1994/gofish-bot/internal/infer/pb"
+	"github.com/jmaurer1994/gofish-bot/internal/infer/protos"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -21,7 +21,7 @@ type InferenceClient struct {
 	conn   *grpc.ClientConn
 	cb     CallbackFunc
 }
-type CallbackFunc func(s *pb.TaskResultSet)
+type CallbackFunc func(s *protos.TaskResultSet)
 
 func NewInferenceClient(task, source, host, port string, cb CallbackFunc) *InferenceClient {
 	return &InferenceClient{
@@ -33,7 +33,7 @@ func NewInferenceClient(task, source, host, port string, cb CallbackFunc) *Infer
 	}
 }
 
-var ConnectionClosedError = errors.New("Connection closed")
+var ConnectionClosed error = errors.New("Connection closed")
 
 func (c *InferenceClient) RunTask(ctx context.Context) {
 	// Connect to the server
@@ -45,7 +45,7 @@ func (c *InferenceClient) RunTask(ctx context.Context) {
 		return
 	}
 
-	client := pb.NewTaskServiceClient(c.conn)
+	client := protos.NewTaskServiceClient(c.conn)
 
 	defer func() {
 		c.conn.Close()
@@ -53,7 +53,7 @@ func (c *InferenceClient) RunTask(ctx context.Context) {
 	}()
 
 	// Create a request
-	request := &pb.TaskRequest{
+	request := &protos.TaskRequest{
 		TaskName: c.Task,
 		Source:   c.source,
 	}

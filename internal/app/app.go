@@ -16,7 +16,7 @@ import (
 	"github.com/jmaurer1994/gofish-bot/internal/chat"
 	"github.com/jmaurer1994/gofish-bot/internal/database"
 	"github.com/jmaurer1994/gofish-bot/internal/infer"
-	"github.com/jmaurer1994/gofish-bot/internal/infer/pb"
+	"github.com/jmaurer1994/gofish-bot/internal/infer/protos"
 	"github.com/jmaurer1994/gofish-bot/internal/obs"
 	"github.com/jmaurer1994/gofish-bot/internal/scheduler"
 	"github.com/jmaurer1994/gofish-bot/internal/twitch"
@@ -29,18 +29,18 @@ import (
 const appTimeout = time.Second * 30
 
 type Config struct {
-	Router    *gin.Engine
-	Overlay   *EventServer
-	Tracker   *infer.InferenceClient
-	TwitchApi *twitch.TwitchApiClient
-	TwitchIrc *twitch.TwitchIrcClient
-	CmdProc   *chat.CommandProcessor
-	Obs       *obs.GoobsClient
-	Db        *database.PGClient
-	Camera    *camera.IpCamera
-	Scheduler *scheduler.Scheduler
-	OwmApi    *weather.OwmClient
-	S3        *minio.Client
+	Router      *gin.Engine
+	EventServer *EventServer
+	Tracker     *infer.InferenceClient
+	TwitchApi   *twitch.TwitchApiClient
+	TwitchIrc   *twitch.TwitchIrcClient
+	CmdProc     *chat.CommandProcessor
+	Obs         *obs.GoobsClient
+	Db          *database.PGClient
+	Camera      *camera.IpCamera
+	Scheduler   *scheduler.Scheduler
+	OwmApi      *weather.OwmClient
+	S3          *minio.Client
 
 	Data struct {
 		Countdown    Countdown
@@ -53,7 +53,7 @@ func (app *Config) Start() {
 	app.Scheduler.Start()
 
 	go app.Router.Run(":8080")
-	go app.Overlay.Listen()
+	go app.EventServer.Listen(context.TODO())
 	go app.Db.Listen(context.Background(), "sensoreventinsert", func(n *pgconn.Notification) {
 		app.Scheduler.GenerateEvent("SensorEvent:Insert", scheduler.Message(n.Payload))
 	})
@@ -72,7 +72,7 @@ func NewApp() *Config {
 	router := gin.Default()
 	sse := NewServer()
 
-	app := &Config{Router: router, Overlay: sse}
+	app := &Config{Router: router, EventServer: sse}
 
 	return app
 }
@@ -100,8 +100,8 @@ func (app *Config) inferenceSetup() {
 		os.Getenv("INFERENCE_SOURCE"),
 		os.Getenv("INFERENCE_HOST"),
 		os.Getenv("INFERENCE_PORT"),
-		func(s *pb.TaskResultSet) {
-			app.Overlay.Render("inference", components.InferenceResult(s))
+		func(s *protos.TaskResultSet) {
+			app.EventServer.SendEvent("inference", components.InferenceResult(s))
 		})
 }
 

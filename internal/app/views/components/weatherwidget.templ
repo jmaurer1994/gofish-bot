@@ -2,6 +2,7 @@ package components
 
 import (
 	"fmt"
+	"github.com/jmaurer1994/gofish-bot/internal/app/views/styles/animations"
 	"github.com/jmaurer1994/gofish-bot/internal/weather"
 )
 
@@ -66,8 +67,16 @@ templ WeatherWidget(w weather.OneCallResponse) {
             border-bottom-left-radius: 40px;
             background-color: #ffffff25;
         }
+
+        .active {
+            display: flex;
+        }
+
+        .hidden {
+            display: none;
+        }
     </style>
-	<div class="weather" sse-swap="weather" hx-swap="outerHTML">
+	<div class="weather">
 		for i, c := range w.Current.Weather {
 			if i == 0 {
 				@ActiveWeatherIcon(c.Icon)
@@ -75,17 +84,17 @@ templ WeatherWidget(w weather.OneCallResponse) {
 				@HiddenWeatherIcon(c.Icon)
 			}
 		}
-		<div class="weather-info temperature fade active">
+		<div class={ "weather-info", "temperature", "active", animations.FadeIn("2.0s") }>
 			<span>{ fmt.Sprintf("%.0f", w.Current.Temp) }</span>
 			<img src="/assets/weather/bas/thermometer-fahrenheit.svg"/>
 			<span>{ fmt.Sprintf("%.1f", weather.FToC(w.Current.Temp)) }</span>
 			<img src="/assets/weather/bas/thermometer-celsius.svg"/>
 		</div>
-		<div class="weather-info humidity fade hidden">
+		<div class={ "weather-info", "humidity", "hidden", animations.FadeIn("2.0s") }>
 			<span>{ fmt.Sprintf("%d", w.Current.Humidity) }</span>
 			<img src="/assets/weather/bas/humidity.svg"/>
 		</div>
-		<div class="weather-info moon fade hidden">
+		<div class={ "weather-info", "moon", "hidden", animations.FadeIn("2.0s") }>
 			if len(w.Daily) > 0 {
 				<span>{ LunarPhaseValueToString(w.Daily[0].MoonPhase) }</span>
 				<img src={ fmt.Sprintf("/assets/weather/bas/%s.svg", LunarPhaseValueToIcon(w.Daily[0].MoonPhase)) }/>
@@ -95,11 +104,11 @@ templ WeatherWidget(w weather.OneCallResponse) {
 }
 
 templ ActiveWeatherIcon(condition string) {
-	<img class="weather-icon fade active" src={ fmt.Sprintf("/assets/weather/bas/openweathermap/%s.svg", condition) }/>
+	<img class={ "weather-icon", "active", animations.FadeIn("2.0s") } src={ fmt.Sprintf("/assets/weather/bas/openweathermap/%s.svg", condition) }/>
 }
 
 templ HiddenWeatherIcon(condition string) {
-	<img class="weather-icon fade hidden" src={ fmt.Sprintf("/assets/weather/bas/openweathermap/%s.svg", condition) }/>
+	<img class={ "weather-icon", "hidden", animations.FadeIn("2.0s") } src={ fmt.Sprintf("/assets/weather/bas/openweathermap/%s.svg", condition) }/>
 }
 
 func LunarPhaseValueToIcon(lpv float64) string {

@@ -1,0 +1,92 @@
+package views
+
+import (
+	"fmt"
+	"github.com/jmaurer1994/gofish-bot/internal/app/views/scripts"
+	"github.com/jmaurer1994/gofish-bot/internal/app/views/styles/animations"
+)
+
+templ Overlay() {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<title>GoFish OBS Overlay</title>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			@scripts.External()
+			@animations.Shared()
+			<style type="text/css">
+                * {
+                    box-sizing: border-box;
+                }
+
+                body {
+                    margin: 0;
+                    padding: 0;
+                    background-color: rgb(0, 0, 0, 0);
+                }
+
+                .overlay {
+                    width: 1920px;
+                    height: 1080px;
+                    position: relative;
+                }
+            </style>
+		</head>
+		<body>
+			<div class="overlay">
+				@EventContainer("/stream") {
+					@EventChannel("overlay-inference", false)
+					@iconBar()
+				}
+			</div>
+		</body>
+	</html>
+}
+
+var slidesHandle = templ.NewOnceHandle()
+
+templ iconBar() {
+	@slidesHandle.Once() {
+		@scripts.FAnimateSlides()
+		<script type="text/javascript">
+            AnimateSlides(6000, "weather-icon", 1);
+            AnimateSlides(6000, "weather-info", 1);
+        </script>
+		sf
+	}
+	<style type="text/css">
+        .icon-bar {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+
+            z-index: 20;
+
+            height: 100px;
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+        }
+    </style>
+	<div class="icon-bar">
+		@EventChannel("overlay-weather", true)
+		@EventChannel("overlay-feeder", true)
+		@EventChannel("overlay-countdown", true)
+	</div>
+}
+
+templ EventContainer(sseEndpoint string) {
+	<div class="event-container" hx-ext="sse" sse-connect={ sseEndpoint }>
+		{ children... }
+	</div>
+}
+
+templ EventChannel(channelName string, loadOnConnect bool) {
+	<div sse-swap={ channelName }>
+		if loadOnConnect {
+			<div hx-get={ fmt.Sprintf("/%s", channelName) } hx-trigger="load" hx-swap="outerHTML"></div>
+		}
+	</div>
+}

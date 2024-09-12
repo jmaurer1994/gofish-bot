@@ -38,7 +38,7 @@ func FeederWidget(current_weight float64) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"feeder\" sse-swap=\"feeder\" hx-swap=\"outerHTML\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<style type=\"text/css\">\n        .feeder {\n            background-color: #333333;\n            height: 100px;\n        }\n\n        .feeder-icon {\n            margin: 10px;\n            height: 80px;\n            border-radius: 40px;\n        }\n    </style><div class=\"feeder\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

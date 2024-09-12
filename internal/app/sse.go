@@ -1,6 +1,9 @@
 package app
 
 import (
+	"bytes"
+	"context"
+	"io"
 	"log"
 
 	"github.com/a-h/templ"
@@ -28,31 +31,27 @@ type EventServer struct {
 // New event messages are broadcast to all registered client connection channels
 type ClientChan chan Message
 
-func (s *EventServer) Render(channel string, template templ.Component) {
+func (s *EventServer) SendEvent(channel string, template templ.Component) {
 	s.Event <- Message{Channel: channel, Data: template}
 }
 
-func render(ctx *gin.Context, status int, template templ.Component) error {
-	ctx.Status(status)
-	return template.Render(ctx.Request.Context(), ctx.Writer)
-}
-
-func NewServer() (event *EventServer) {
-	event = &EventServer{
+func NewServer() *EventServer {
+	return &EventServer{
 		Event:         make(chan Message),
 		NewClients:    make(chan chan Message),
 		ClosedClients: make(chan chan Message),
 		TotalClients:  make(map[chan Message]bool),
 	}
 
-	return
 }
 
 // It Listens all incoming requests from clients.
 // Handles addition and removal of clients and broadcast messages to clients.
-func (s *EventServer) Listen() {
+func (s *EventServer) Listen(ctx context.Context) {
 	for {
 		select {
+		case <-ctx.Done():
+			log.Printf("[SSE] Server stopped: %d", ctx.Err())
 		// Add new available client
 		case client := <-s.NewClients:
 			s.TotalClients[client] = true
@@ -73,8 +72,8 @@ func (s *EventServer) Listen() {
 	}
 }
 
-func (s *EventServer) serveHTTP() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (s *EventServer) ServeHTTP() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
 		// Initialize client channel
 		clientChan := make(ClientChan)
 
@@ -86,18 +85,47 @@ func (s *EventServer) serveHTTP() gin.HandlerFunc {
 			s.ClosedClients <- clientChan
 		}()
 
-		c.Set("clientChan", clientChan)
+		ctx.Set("clientChan", clientChan)
 
-		c.Next()
+		ctx.Next()
 	}
 }
 
 func HeadersMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Writer.Header().Set("Content-Type", "text/event-s")
-		c.Writer.Header().Set("Cache-Control", "no-cache")
-		c.Writer.Header().Set("Connection", "keep-alive")
-		c.Writer.Header().Set("Transfer-Encoding", "chunked")
-		c.Next()
+	return func(ctx *gin.Context) {
+		ctx.Writer.Header().Set("Content-Type", "text/event-stream")
+		ctx.Writer.Header().Set("Cache-Control", "no-cache")
+		ctx.Writer.Header().Set("Connection", "keep-alive")
+		ctx.Writer.Header().Set("Transfer-Encoding", "chunked")
+		ctx.Next()
+	}
+}
+
+func EventHandler() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		v, ok := ctx.Get("clientChan")
+		if !ok {
+			return
+		}
+		clientChan, ok := v.(ClientChan)
+		if !ok {
+			return
+		}
+		ctx.Stream(func(w io.Writer) bool {
+			// Stream message to client from message channel
+			if msg, ok := <-clientChan; ok {
+				template := msg.Data
+				buff := new(bytes.Buffer)
+
+				if err := template.Render(ctx, buff); err != nil {
+					log.Printf("[SSE] Render error: %v\n", err)
+					return false
+				}
+				ctx.SSEvent(msg.Channel, buff.String())
+
+				return true
+			}
+			return false
+		})
 	}
 }

@@ -78,8 +78,8 @@ func (app *Config) OwmUpdate(t *scheduler.Task, ctx context.Context) error {
 		app.Scheduler.GenerateEvent("camera:light:check", "off")
 	}
 
-	app.Overlay.Render("weather", components.WeatherWidget(w))
-	app.Overlay.Render("countdown", components.CountdownWidget(app.Data.Countdown.Hours(), app.Data.Countdown.Minutes(), app.Data.Countdown.Target))
+	app.EventServer.SendEvent("weather", components.WeatherWidget(w))
+	app.EventServer.SendEvent("countdown", components.CountdownWidget(app.Data.Countdown.Hours(), app.Data.Countdown.Minutes(), app.Data.Countdown.Target))
 
 	return nil
 }
@@ -152,6 +152,6 @@ func (app *Config) UpdateFeederWeight(t *scheduler.Task, tx context.Context) err
 
 	app.Data.FeederWeight = f
 
-	app.Overlay.Render("feeder", components.FeederWidget(f))
+	app.EventServer.SendEvent("feeder", components.FeederWidget(f))
 	return nil
 }

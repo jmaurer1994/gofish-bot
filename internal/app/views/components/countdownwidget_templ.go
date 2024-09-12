@@ -28,14 +28,14 @@ func CountdownWidget(hours int, minutes int, icon string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"countdown\" sse-swap=\"countdown\" hx-swap=\"outerHTML\"><div class=\"hours\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<style type=\"text/css\">\n       .countdown img {\n            width: 80px;\n            height: 80px;\n            margin-right: 10px;\n            background-color: rgb(0, 0, 0, .3);\n            border-top-right-radius: 40px;\n            border-bottom-right-radius: 40px;\n        }\n\n        .countdown {\n            display: flex;\n            flex-direction: row;\n            justify-content: center;\n            align-items: center;\n            background: #6684b3;\n            border-top-right-radius: 50px;\n            border-bottom-right-radius: 50px;\n            height: 100px;\n        }\n\n        .countdown div {\n            font-size: 2.5rem;\n            font-weight: bold;\n            font-family: arial;\n            border: 2px solid #ffffffeb;\n            background-color: #ffffffcc;\n            border-radius: 8px;\n            height: 80px;\n            line-height: 80px;\n            box-shadow: 2px 2px 5px black;\n        }\n\n        .hours {\n            margin-left: 20px;\n            margin-right: 3px;\n        } \n    </style><div class=\"countdown\"><div class=\"hours\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%02d", hours))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/app/views/components/countdownwidget.templ`, Line: 8, Col: 31}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/app/views/components/countdownwidget.templ`, Line: 46, Col: 31}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -48,7 +48,7 @@ func CountdownWidget(hours int, minutes int, icon string) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%02d", minutes))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/app/views/components/countdownwidget.templ`, Line: 11, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/app/views/components/countdownwidget.templ`, Line: 49, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -61,7 +61,7 @@ func CountdownWidget(hours int, minutes int, icon string) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/assets/weather/bas/%s.svg", icon))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/app/views/components/countdownwidget.templ`, Line: 13, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/app/views/components/countdownwidget.templ`, Line: 51, Col: 60}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {

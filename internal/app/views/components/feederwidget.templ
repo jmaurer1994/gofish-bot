@@ -7,7 +7,7 @@ css backgroundfill(percent float64) {
 }
 
 templ FeederWidget(current_weight float64) {
-	<style>
+	<style type="text/css">
         .feeder {
             background-color: #333333;
             height: 100px;
@@ -19,7 +19,7 @@ templ FeederWidget(current_weight float64) {
             border-radius: 40px;
         }
     </style>
-	<div class="feeder" sse-swap="feeder" hx-swap="outerHTML">
+	<div class="feeder">
 		<img class={ "feeder-icon", backgroundfill(current_weight / 1500.0 * 100) } src="/assets/feeder.png"/>
 	</div>
 }

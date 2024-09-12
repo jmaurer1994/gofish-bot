@@ -3,7 +3,7 @@ package components
 import (
 	"bytes"
 	"fmt"
-	"github.com/jmaurer1994/gofish-bot/internal/infer/pb"
+	"github.com/jmaurer1994/gofish-bot/internal/infer/protos"
 )
 
 var colors = []string{
@@ -38,7 +38,7 @@ css border(size string, color string) {
 
 var inferenceHandle = templ.NewOnceHandle()
 
-templ InferenceResult(s *pb.TaskResultSet) {
+templ InferenceResult(s *protos.TaskResultSet) {
 	@inferenceHandle.Once() {
 		<style type="text/css">
              @keyframes disappear {

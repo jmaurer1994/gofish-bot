@@ -1,29 +1,24 @@
 package app
 
 import (
-	"bytes"
 	"context"
-	"io"
-	"log"
 	"net/http"
 
+	"github.com/a-h/templ"
 	"github.com/gin-gonic/gin"
 	"github.com/jmaurer1994/gofish-bot/internal/app/views"
 	"github.com/jmaurer1994/gofish-bot/internal/app/views/components"
 )
 
 func (app *Config) Routes() {
-	app.Router.GET("/stream", HeadersMiddleware(), app.Overlay.serveHTTP(), app.eventHandler())
+	app.Router.GET("/stream", HeadersMiddleware(), app.EventServer.ServeHTTP(), EventHandler())
 
-	app.Router.GET("/", app.indexPageHandler())
-	app.Router.GET("/weather", app.weatherComponentHandler())
-	app.Router.GET("/countdown", app.countdownComponentHandler())
-	app.Router.GET("/feeder", app.feederComponentHandler())
+	app.Router.GET("/", app.OverlayViewHandler())
+	app.Router.GET("/overlay-weather", app.weatherComponentHandler())
+	app.Router.GET("/overlay-countdown", app.countdownComponentHandler())
+	app.Router.GET("/overlay-feeder", app.feederComponentHandler())
 
 	app.Router.Static("/assets", "./assets")
-	app.Router.StaticFile("/style.css", "./resources/style.css")
-	app.Router.StaticFile("/main.js", "./resources/main.js")
-
 }
 
 func (app *Config) weatherComponentHandler() gin.HandlerFunc {
@@ -53,40 +48,16 @@ func (app *Config) feederComponentHandler() gin.HandlerFunc {
 	}
 }
 
-func (app *Config) eventHandler() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		v, ok := ctx.Get("clientChan")
-		if !ok {
-			return
-		}
-		clientChan, ok := v.(ClientChan)
-		if !ok {
-			return
-		}
-		ctx.Stream(func(w io.Writer) bool {
-
-			// Stream message to client from message channel
-			if msg, ok := <-clientChan; ok {
-				template := msg.Data
-				buff := new(bytes.Buffer)
-
-				if err := template.Render(ctx, buff); err != nil {
-					log.Printf("[SSE] Render error: %v\n", err)
-					return false
-				}
-				ctx.SSEvent(msg.Channel, buff.String())
-
-				return true
-			}
-			return false
-		})
-	}
-}
-func (app *Config) indexPageHandler() gin.HandlerFunc {
+func (app *Config) OverlayViewHandler() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		_, cancel := context.WithTimeout(context.Background(), appTimeout)
 		defer cancel()
 
-		render(ctx, http.StatusOK, views.Index())
+		render(ctx, http.StatusOK, views.Overlay())
 	}
+}
+
+func render(ctx *gin.Context, status int, template templ.Component) error {
+	ctx.Status(status)
+	return template.Render(ctx.Request.Context(), ctx.Writer)
 }
